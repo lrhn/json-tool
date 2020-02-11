@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 name: jsontool
-version: 1.0.0
-description: Tools for working with JSON
+version: 1.0.1
+description:
+  Low-level tools for working with JSON without creating intermediate objects.
 homepage: https://www.github.com/lrhn/json-tool
 environment:
   sdk: ">=2.5.0 <3.0.0-0"

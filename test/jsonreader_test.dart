@@ -289,8 +289,7 @@ void testReader(JsonReader read(String source)) {
     });
 
     test("array first", () {
-      var reader =
-          read('[{"x":[1, 2.5, true], "y": 1, "z": 2}]');
+      var reader = read('[{"x":[1, 2.5, true], "y": 1, "z": 2}]');
       var validator = validateJsonReader(reader);
 
       // Expect value, not inside array or object.

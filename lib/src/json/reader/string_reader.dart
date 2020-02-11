@@ -15,9 +15,6 @@
 import "../sink/sink.dart";
 import "reader.dart";
 import "util.dart";
-import 'util.dart';
-import 'util.dart';
-import 'util.dart';
 
 /// A non-validating string-based [JsonReader].
 class JsonStringReader implements JsonReader<StringSlice> {

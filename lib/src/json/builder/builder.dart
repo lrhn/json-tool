@@ -27,10 +27,10 @@ typedef JsonBuilder<T> = T Function(JsonReader);
 /// where the values are JSON-like structures.
 Object /*?*/ jsonValue(JsonReader reader) {
   if (reader.checkObject()) {
-    return jsonObject<Object /*?*/>(jsonValue)(reader);
+    return jsonObject<Object /*?*/ >(jsonValue)(reader);
   }
   if (reader.checkArray()) {
-    return jsonArray<Object /*?*/>(jsonValue)(reader);
+    return jsonArray<Object /*?*/ >(jsonValue)(reader);
   }
   if (reader.tryNull()) return null;
   return reader.tryNum() ??

@@ -17,7 +17,6 @@ import "dart:typed_data";
 import "../sink/sink.dart";
 import "reader.dart";
 import "util.dart";
-import 'util.dart';
 
 /// A non-validating UTF-8 byte-based [JsonReader].
 class JsonByteReader implements JsonReader<Uint8List> {
