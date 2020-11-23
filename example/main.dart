@@ -167,7 +167,7 @@ List<Planet> buildPlanets(JsonReader reader) {
   reader.expectObject();
   var result = <Planet>[];
   while (true) {
-    var key = reader.tryKey(const ["version", "planets"]);
+    var key = reader.tryKey(const ["planets", "version"]);
     if (key == "version") {
       var version = reader.expectInt();
       if (version != 1) throw FormatException("Unknown version");
