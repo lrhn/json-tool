@@ -30,7 +30,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
   /// Used by [copy] to create a copy of this reader's state.
   JsonStringReader._(this._source, this._index);
 
-  FormatException _error(String message, [int /*?*/ index]) =>
+  FormatException _error(String message, [int? index]) =>
       FormatException(message, _source, index ?? _index);
 
   void expectObject() {
@@ -46,7 +46,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return false;
   }
 
-  String /*?*/ nextKey() {
+  String? nextKey() {
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) {
       _index++;
@@ -60,7 +60,19 @@ class JsonStringReader implements JsonReader<StringSlice> {
     throw _error("Not a string");
   }
 
-  StringSlice /*?*/ nextKeySource() {
+  bool hasNextKey() {
+    var nextKey = _nextKeyStart();
+    if (nextKey == $rbrace) {
+      _index++;
+      return false;
+    }
+    if (nextKey == $quot) {
+      return true;
+    }
+    throw _error("Not a string");
+  }
+
+  StringSlice? nextKeySource() {
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) {
       _index++;
@@ -79,7 +91,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     throw _error("Not a string");
   }
 
-  String /*?*/ tryKey(List<String> candidates) {
+  String? tryKey(List<String> candidates) {
     assert(areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     if (candidates.isEmpty) return null;
@@ -121,7 +133,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
   ///
   /// Must be positioned at a `"` character.
   /// The candidates must be sorted ASCII strings.
-  String /*?*/ _tryCandidateString(List<String> candidates) {
+  String? _tryCandidateString(List<String> candidates) {
     var min = 0;
     var max = candidates.length;
     var start = _index + 1;
@@ -237,7 +249,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return false;
   }
 
-  String expectString([List<String> candidates]) {
+  String expectString([List<String>? candidates]) {
     assert(candidates == null || areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     var char = _nextNonWhitespaceChar();
@@ -257,7 +269,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
   String _scanString() {
     assert(_source.codeUnitAt(_index) == $quot);
     _index++;
-    StringBuffer /*?*/ buffer;
+    StringBuffer? buffer;
     var start = _index;
     while (_index < _source.length) {
       var char = _source.codeUnitAt(_index++);
@@ -268,7 +280,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
       }
       if (char == $backslash) {
         var buf = (buffer ??= StringBuffer());
-        buf..write(_source.substring(start, _index - 1));
+        buf.write(_source.substring(start, _index - 1));
         if (_index < _source.length) {
           char = _source.codeUnitAt(_index++);
           start = _scanEscape(buf, char);
@@ -329,7 +341,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return _index;
   }
 
-  bool /*?*/ tryBool() {
+  bool? tryBool() {
     var char = _nextNonWhitespaceChar();
     if (char == $t) {
       assert(_source.startsWith("rue", _index + 1));
@@ -359,11 +371,11 @@ class JsonStringReader implements JsonReader<StringSlice> {
     tryNull() || (throw _error("Not null"));
   }
 
-  int expectInt() => _scanInt(true) /*!*/;
+  int expectInt() => _scanInt(true)!;
 
-  int tryInt() => _scanInt(false);
+  int? tryInt() => _scanInt(false);
 
-  int /*?*/ _scanInt(bool throws) {
+  int? _scanInt(bool throws) {
     var char = _nextNonWhitespaceChar();
     _index++;
     var sign = 1;
@@ -402,15 +414,15 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return sign >= 0 ? result : -result;
   }
 
-  num expectNum() => _scanNumber(false, true) /*!*/;
+  num expectNum() => _scanNumber(false, true)!;
 
-  num /*?*/ tryNum() => _scanNumber(false, false);
+  num? tryNum() => _scanNumber(false, false);
 
-  double expectDouble() => _scanNumber(true, true) /*!*/;
+  double expectDouble() => _scanNumber(true, true) as double;
 
-  double /*?*/ tryDouble() => _scanNumber(true, false);
+  double? tryDouble() => _scanNumber(true, false) as double?;
 
-  num _scanNumber(bool asDouble, bool throws) {
+  num? _scanNumber(bool asDouble, bool throws) {
     var char = _nextNonWhitespaceChar();
     var start = _index;
     var index = start + 1;
@@ -458,8 +470,9 @@ class JsonStringReader implements JsonReader<StringSlice> {
       try {
         doubleResult = double.parse(slice);
       } on FormatException catch (e) {
+        var offset = e.offset;
         throw FormatException("Not a number", _source,
-            e.offset == null ? null : start + e.offset);
+            offset == null ? null : start + offset);
       }
     } else {
       var result = double.tryParse(slice);
@@ -577,16 +590,16 @@ class JsonStringReader implements JsonReader<StringSlice> {
     }
   }
 
-  StringSlice /*?*/ expectAnyValueSource() {
+  StringSlice expectAnyValueSource() {
     var next = _nextNonWhitespaceChar();
-    if (next < 0) return null;
+    if (next < 0) return throw _error("Not a value");
     var start = _index;
     _skipValue();
     var end = _index;
     return StringSlice(_source, start, end);
   }
 
-  String /*?*/ tryString([List<String> candidates]) {
+  String? tryString([List<String>? candidates]) {
     assert(candidates == null || areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     if (_nextNonWhitespaceChar() == $quot) {
@@ -614,10 +627,11 @@ class JsonStringReader implements JsonReader<StringSlice> {
       case $lbrace:
         _index++;
         sink.startObject();
-        String /*?*/ key;
-        while ((key = nextKey()) != null) {
+        var key = nextKey();
+        while (key != null) {
           sink.addKey(key);
           expectAnyValue(sink);
+          key = nextKey();
         }
         sink.endObject();
         return;
@@ -649,6 +663,11 @@ class JsonStringReader implements JsonReader<StringSlice> {
   }
 }
 
+/// A slice of a larger string.
+///
+/// Represents the substring of [source] from [start] to [end].
+/// Allows some operations on that substring without having to
+/// create it as a separate string.
 class StringSlice {
   /// The original string.
   final String source;
@@ -663,11 +682,47 @@ class StringSlice {
   /// This is the _index of the first character after the end of the slice.
   final int end;
 
+  /// length of the string slice.
+  int get length => end - start;
+
+  /// A substring of the string slice.
+  String substring(int start, [int? end]) {
+    end = RangeError.checkValidRange(start, end, this.end - this.start);
+    return source.substring(this.start + start, this.start + end);
+  }
+
+  /// A sub-slice of the string slice.
+  StringSlice subslice(int start, [int? end]) {
+    end = RangeError.checkValidRange(start, end, this.end - this.start);
+    return StringSlice(source, this.start + start, this.start + end);
+  }
+
+  /// The index of the first occurrence of [pattern] in this slice string.
+  ///
+  /// Returns `-1` if [pattern] does not occur inside this
+  /// slice string at a position after [start].
+  int indexOf(String pattern, [int start = 0, int? end]) {
+    end = RangeError.checkValidRange(start, end, this.end - this.start);
+    return _indexOf(pattern, start, end);
+  }
+
+  int _indexOf(String pattern, int start, int end) {
+    var last = end - pattern.length;
+    for (var i = start; i <= last; i++) {
+      if (source.startsWith(pattern, this.start + i)) return i;
+    }
+    return -1;
+  }
+
+  /// Whether the slice string contains [pattern].
+  bool contains(String pattern) => _indexOf(pattern, 0, end - start) >= 0;
+
   /// Creates a slice of [source] from [start] to [end].
   const StringSlice(this.source, this.start, this.end)
       : assert(0 <= start),
         assert(start <= end),
         assert(end <= source.length);
 
+  /// The slice string characters as a separate string.
   String toString() => source.substring(start, end);
 }

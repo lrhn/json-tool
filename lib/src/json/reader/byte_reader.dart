@@ -34,7 +34,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
   /// Used by [copy] to create a new byte reader with the same state.
   JsonByteReader._(this._source, this._index);
 
-  FormatException _error(String message, [int /*?*/ index]) =>
+  FormatException _error(String message, [int? index]) =>
       FormatException(message, _source, index ?? _index);
 
   void expectObject() {
@@ -50,7 +50,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
     return false;
   }
 
-  String /*?*/ nextKey() {
+  String? nextKey() {
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) {
       _index++;
@@ -64,7 +64,19 @@ class JsonByteReader implements JsonReader<Uint8List> {
     throw _error("Not a string");
   }
 
-  Uint8List /*?*/ nextKeySource() {
+  bool hasNextKey() {
+    var nextKey = _nextKeyStart();
+    if (nextKey == $rbrace) {
+      _index++;
+      return false;
+    }
+    if (nextKey == $quot) {
+      return true;
+    }
+    throw _error("Not a string");
+  }
+
+  Uint8List? nextKeySource() {
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) {
       _index++;
@@ -84,7 +96,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
     throw _error("Not a string");
   }
 
-  String /*?*/ tryKey(List<String> candidates) {
+  String? tryKey(List<String> candidates) {
     assert(areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     var nextKey = _nextKeyStart();
@@ -118,7 +130,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
     _index++;
   }
 
-  String /*?*/ _tryCandidateString(List<String> candidates) {
+  String? _tryCandidateString(List<String> candidates) {
     var min = 0;
     var max = candidates.length;
     var start = _index + 1;
@@ -230,7 +242,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
     return false;
   }
 
-  String expectString([List<String> candidates]) {
+  String expectString([List<String>? candidates]) {
     var char = _nextNonWhitespaceChar();
     if (char != $quot) {
       throw _error("Not a string");
@@ -248,7 +260,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
   String _scanString() {
     assert(_source[_index] == $quot);
     _index++;
-    StringBuffer /*?*/ buffer;
+    StringBuffer? buffer;
     var start = _index;
     while (_index < _source.length) {
       var char = _source[_index++];
@@ -259,7 +271,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
       }
       if (char == $backslash) {
         var buf = (buffer ??= StringBuffer());
-        buf..write(_stringFrom(start, _index - 1));
+        buf.write(_stringFrom(start, _index - 1));
         if (_index < _source.length) {
           char = _source[_index++];
           start = _scanEscape(buf, char);
@@ -365,7 +377,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
     return _index;
   }
 
-  bool /*?*/ tryBool() {
+  bool? tryBool() {
     var char = _nextNonWhitespaceChar();
     if (char == $t) {
       assert(_startsWith("rue", _source, _index + 1));
@@ -395,11 +407,11 @@ class JsonByteReader implements JsonReader<Uint8List> {
     tryNull() || (throw _error("Not null"));
   }
 
-  int expectInt() => _scanInt(true) /*!*/;
+  int expectInt() => _scanInt(true)!;
 
-  int tryInt() => _scanInt(false);
+  int? tryInt() => _scanInt(false);
 
-  int /*?*/ _scanInt(bool throws) {
+  int? _scanInt(bool throws) {
     var char = _nextNonWhitespaceChar();
     _index++;
     var sign = 1;
@@ -438,15 +450,15 @@ class JsonByteReader implements JsonReader<Uint8List> {
     return sign >= 0 ? result : -result;
   }
 
-  num expectNum() => _scanNumber(false, true) /*!*/;
+  num expectNum() => _scanNumber(false, true)!;
 
-  num /*?*/ tryNum() => _scanNumber(false, false);
+  num? tryNum() => _scanNumber(false, false);
 
-  double expectDouble() => _scanNumber(true, true) /*!*/;
+  double expectDouble() => _scanNumber(true, true) as double;
 
-  double /*?*/ tryDouble() => _scanNumber(true, false);
+  double? tryDouble() => _scanNumber(true, false) as double?;
 
-  num _scanNumber(bool asDouble, bool throws) {
+  num? _scanNumber(bool asDouble, bool throws) {
     var char = _nextNonWhitespaceChar();
     var start = _index;
     var index = start + 1;
@@ -495,8 +507,9 @@ class JsonByteReader implements JsonReader<Uint8List> {
       try {
         doubleResult = double.parse(slice);
       } on FormatException catch (e) {
+        var offset = e.offset;
         throw FormatException("Not a number", _source,
-            e.offset == null ? null : start + e.offset);
+            offset == null ? null : start + offset);
       }
     } else {
       var result = double.tryParse(slice);
@@ -614,9 +627,9 @@ class JsonByteReader implements JsonReader<Uint8List> {
     }
   }
 
-  Uint8List /*?*/ expectAnyValueSource() {
+  Uint8List expectAnyValueSource() {
     var next = _nextNonWhitespaceChar();
-    if (next < 0) return null;
+    if (next < 0) return throw _error("Not a value");
     var start = _index;
     _skipValue();
     var end = _index;
@@ -624,7 +637,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
         .asUint8List(_source.offsetInBytes + start, end - start);
   }
 
-  String /*?*/ tryString([List<String> candidates]) {
+  String? tryString([List<String>? candidates]) {
     if (_nextNonWhitespaceChar() == $quot) {
       if (candidates != null) {
         return _tryCandidateString(candidates);
@@ -659,10 +672,11 @@ class JsonByteReader implements JsonReader<Uint8List> {
       case $lbrace:
         _index++;
         sink.startArray();
-        String /*?*/ key;
-        while ((key = nextKey()) != null) {
+        var key = nextKey();
+        while (key != null) {
           sink.addKey(key);
           expectAnyValue(sink);
+          key = nextKey();
         }
         sink.endObject();
         return;

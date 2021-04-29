@@ -40,43 +40,36 @@ class ValidatingJsonSink implements JsonSink {
     _sink.addKey(key);
   }
 
-  @override
   void addNull() {
     _validator.value();
     _sink.addNull();
   }
 
-  @override
-  void addNumber(num value) {
+  void addNumber(num? value) {
     _validator.value();
     _sink.addNumber(value);
   }
 
-  @override
   void addString(String value) {
     _validator.value();
     _sink.addString(value);
   }
 
-  @override
   void endArray() {
     _validator.endArray();
     _sink.endArray();
   }
 
-  @override
   void endObject() {
     _validator.endObject();
     _sink.endObject();
   }
 
-  @override
   void startArray() {
     _validator.startArray();
     _sink.startArray();
   }
 
-  @override
   void startObject() {
     _validator.startObject();
     _sink.startObject();

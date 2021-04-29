@@ -25,7 +25,7 @@ import "util.dart";
 /// * a string,
 /// * a list of JSON-like object structures or
 /// * a map from strings to JSON-like object structures.
-class JsonObjectReader implements JsonReader<Object /*?*/ > {
+class JsonObjectReader implements JsonReader<Object? > {
   /// The next object to access.
   ///
   /// Is set to `#_none` when there are no next object available.
@@ -34,7 +34,7 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
   /// but before calling [hasNext] or [endArray],
   /// or after entering an object or reading an object value,
   /// but before calling [expectKey], [tryKey] or [endObject].
-  Object /*?*/ _next;
+  Object? _next;
 
   /// Stack of the currently entered objects and arrays.
   ///
@@ -44,10 +44,10 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
   ///
   /// Stack elements are automatically popped from the stack
   /// when they have been completely iterated.
-  _Stack /*?*/ _stack;
+  _Stack? _stack;
 
   /// Creates a reader for the [object] value.
-  JsonObjectReader(Object /*?*/ object) : _next = object;
+  JsonObjectReader(Object? object) : _next = object;
 
   /// Used by [copy] to create a copy of this reader's state.
   JsonObjectReader._(this._next, this._stack);
@@ -76,7 +76,7 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     return _next is String;
   }
 
-  Object expectAnyValueSource() {
+  Object? expectAnyValueSource() {
     var result = _next;
     if (result == #_none) throw StateError("No value");
     _next = #_none;
@@ -104,15 +104,15 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
 
   void expectObject() => tryObject() || (throw _error("Not a JSON object"));
 
-  String expectString([List<String> /*?*/ candidates]) =>
+  String expectString([List<String>? candidates]) =>
       tryString(candidates) ?? (throw _error("Not a string"));
 
   bool hasNext() {
     if (_next == #_none) {
       var stack = _stack;
-      _ListStack list;
+      _ListStack? list;
       if (stack != null && (list = stack.asList) != null) {
-        if (list.hasNext) {
+        if (list!.hasNext) {
           _next = list.moveNext();
           return true;
         }
@@ -124,11 +124,11 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     throw StateError("Not before a JSON array element");
   }
 
-  String nextKey() {
+  String? nextKey() {
     if (_next == #_none) {
       var stack = _stack;
       if (stack != null && stack.isMap) {
-        var map = stack.asMap;
+        var map = stack.asMap!;
         var key = map.nextKey();
         if (key != null) {
           _next = map.valueOf(key);
@@ -142,7 +142,24 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     throw StateError("Not before a JSON object key");
   }
 
-  String nextKeySource() => nextKey();
+  bool hasNextKey() {
+    if (_next == #_none) {
+      var stack = _stack;
+      if (stack != null && stack.isMap) {
+        var map = stack.asMap!;
+        var key = map.peekKey();
+        if (key != null) {
+          return true;
+        }
+        _stack = stack.next;
+        _next = #_none;
+        return false;
+      }
+    }
+    throw StateError("Not before a JSON object key");
+  }
+
+  String? nextKeySource() => nextKey();
 
   bool tryArray() {
     var current = _next;
@@ -157,7 +174,7 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     return false;
   }
 
-  bool /*?*/ tryBool() {
+  bool? tryBool() {
     var current = _next;
     if (current is bool) {
       _next = #_none;
@@ -169,7 +186,7 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     return null;
   }
 
-  double /*?*/ tryDouble() {
+  double? tryDouble() {
     var current = _next;
     if (current is num) {
       _next = #_none;
@@ -181,7 +198,7 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     return null;
   }
 
-  int /*?*/ tryInt() {
+  int? tryInt() {
     var current = _next;
     if (current is int) {
       _next = #_none;
@@ -190,14 +207,14 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     return null;
   }
 
-  String /*?*/ tryKey(List<String> candidates) {
+  String? tryKey(List<String> candidates) {
     assert(areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     if (_next == #_none) {
       var stack = _stack;
-      _MapStack /*?*/ map;
+      _MapStack? map;
       if (stack != null && (map = stack.asMap) != null) {
-        var key = map.peekKey();
+        var key = map!.peekKey();
         if (key != null) {
           var index = candidates.indexOf(key);
           if (index >= 0) {
@@ -224,7 +241,7 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     return false;
   }
 
-  num /*?*/ tryNum() {
+  num? tryNum() {
     var current = _next;
     if (current is num) {
       _next = #_none;
@@ -249,7 +266,7 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     return false;
   }
 
-  String /*?*/ tryString([List<String> candidates]) {
+  String? tryString([List<String>? candidates]) {
     var current = _next;
     if (current is String) {
       if (candidates != null) {
@@ -276,27 +293,27 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
 
   void endArray() {
     var stack = _stack;
-    do {
+    while (stack != null) {
       if (stack.isList) {
         _stack = stack.next;
         _next = #_none;
         return;
       }
       stack = stack.next;
-    } while (stack != null);
+    }
     throw StateError("Not inside a JSON array");
   }
 
   void endObject() {
     var stack = _stack;
-    do {
+    while (stack != null) {
       if (stack.isMap) {
         _stack = stack.next;
         _next = #_none;
         return;
       }
-      stack = stack.next;
-    } while (stack != null);
+      stack = stack.next!;
+    }
     throw StateError("Not inside a JSON object");
   }
 
@@ -314,16 +331,17 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
     throw StateError("Not before a JSON object key");
   }
 
-  JsonObjectReader copy() => JsonObjectReader._(_next, _stack.copy());
+  JsonObjectReader copy() => JsonObjectReader._(_next, _stack?.copy());
 
   void expectAnyValue(JsonSink sink) {
     void emitValue() {
       if (tryObject()) {
         sink.startObject();
-        String key;
-        while ((key = nextKey()) != null) {
+        var key = nextKeySource();
+        while (key != null) {
           sink.addKey(key);
           emitValue();
+          key = nextKey();
         }
         return;
       }
@@ -360,13 +378,13 @@ class JsonObjectReader implements JsonReader<Object /*?*/ > {
 }
 
 abstract class _Stack {
-  final _Stack next;
+  final _Stack? next;
   _Stack(this.next);
 
   bool get isMap => false;
   bool get isList => false;
-  _MapStack get asMap => null;
-  _ListStack get asList => null;
+  _MapStack? get asMap => null;
+  _ListStack? get asList => null;
 
   _Stack copy();
 }
@@ -374,7 +392,7 @@ abstract class _Stack {
 class _ListStack extends _Stack {
   final List<dynamic> elements;
   int index = 0;
-  _ListStack(List<dynamic> list, _Stack parent)
+  _ListStack(List<dynamic> list, _Stack? parent)
       : elements = list,
         super(parent);
 
@@ -393,14 +411,14 @@ class _MapStack extends _Stack {
   final List<String> keys;
   int index;
 
-  _MapStack(Map<String, dynamic> map, _Stack parent)
+  _MapStack(Map<String, dynamic> map, _Stack? parent)
       : this._(map, map.keys.toList(), 0, parent);
 
-  _MapStack._(this.map, this.keys, this.index, _Stack parent) : super(parent);
+  _MapStack._(this.map, this.keys, this.index, _Stack? parent) : super(parent);
 
-  String /*?*/ nextKey() => (index < keys.length) ? keys[index++] : null;
+  String? nextKey() => (index < keys.length) ? keys[index++] : null;
 
-  String /*?*/ peekKey() => (index < keys.length) ? keys[index] : null;
+  String? peekKey() => (index < keys.length) ? keys[index] : null;
 
   void moveNext() {
     index++;

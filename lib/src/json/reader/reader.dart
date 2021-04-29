@@ -154,8 +154,12 @@ abstract class JsonReader<SourceSlice> {
   /// structures, or a map from strings to JSON-like object
   /// structures.
   ///
-  /// Returns the actual JSON-like object from [expectAnyValueSource].
-  static JsonReader<Object> fromObject(Object source) =>
+  /// Returns the current object from [expectAnyValueSource],
+  /// whether it's JSON-like or not.
+  /// If all the `check`-methods return false where a value
+  /// is expected, then it's likely because a non-JSON-like
+  /// object is embedded in the object structure.
+  static JsonReader<Object?> fromObject(Object? source) =>
       JsonObjectReader(source);
 
   /// Consumes the next value which must be `null`.
@@ -179,7 +183,7 @@ abstract class JsonReader<SourceSlice> {
   /// Returns `null` and does not consume anything
   /// if there is no next value or the next value
   /// is not a boolean.
-  bool /*?*/ tryBool();
+  bool? tryBool();
 
   /// Whether the next value is a boolean.
   bool checkBool();
@@ -199,7 +203,7 @@ abstract class JsonReader<SourceSlice> {
   /// has no decimal point or exponent, otherwise
   /// as a [double] (as if parsed by [num.parse]).
   /// Returns `null` if the next value is not a number.
-  num /*?*/ tryNum();
+  num? tryNum();
 
   /// Whether the next value is a number.
   bool checkNum();
@@ -217,7 +221,7 @@ abstract class JsonReader<SourceSlice> {
   /// with no decimal point or exponent,
   /// it is returned as an [int] (as if parsed by [int.parse]).
   /// Returns `null` if the next value is not an integer.
-  int /*?*/ tryInt();
+  int? tryInt();
 
   /// The next value, which must be a number.
   ///
@@ -230,7 +234,7 @@ abstract class JsonReader<SourceSlice> {
   /// If the next value is a valid JSON number,
   /// it is returned as a [double] (as if parsed by [double.parse]).
   /// Returns `null` if the next value is not a number.
-  double /*?*/ tryDouble();
+  double? tryDouble();
 
   /// The next value, which must be a string.
   ///
@@ -240,7 +244,7 @@ abstract class JsonReader<SourceSlice> {
   ///
   /// Equivalent to [tryString] except that it throws where
   /// [tryString] would return `null`.
-  String expectString([List<String> candidates]);
+  String expectString([List<String>? candidates]);
 
   /// The next value, if it is a string.
   ///
@@ -276,7 +280,7 @@ abstract class JsonReader<SourceSlice> {
   /// Using the [candidates] parameter avoids allocating a new string
   /// if you are sure that it will have one of a small number of known
   /// values.
-  String /*?*/ tryString([List<String> candidates]);
+  String? tryString([List<String>? candidates]);
 
   /// Whether the next value is a string.
   bool checkString();
@@ -345,6 +349,29 @@ abstract class JsonReader<SourceSlice> {
   /// Whether the next value is an object.
   bool checkObject();
 
+  /// Check whether there is a next key, close object if not.
+  ///
+  /// Must only be used while reading an object.
+  /// If the current object has more properties,
+  /// then this function returns `true` and does nothing else.
+  /// The next call to [nextKey] is then guaranteed to
+  /// return a string.
+  ///
+  /// If the current object has no more properties,
+  /// then this function returns `false` *and* the object
+  /// is completed as if a call to [nextKey] had returned `null`.
+  ///
+  /// This behavior allows for usage patterns like:
+  /// ```dart
+  ///   var result = <String, String>{};
+  ///   while (reader.hasNextKey()) {
+  ///     result[reader.nextKey()!] = reader.expectString();
+  ///   }
+  /// ```
+  /// without needing to introduce an extra variable to hold the key
+  /// and then check if the key is `null`.
+  bool hasNextKey();
+
   /// The next key of the current object.
   ///
   /// Must only be used while reading an object.
@@ -355,7 +382,7 @@ abstract class JsonReader<SourceSlice> {
   ///
   /// Returns `null` if there are no further entries,
   /// and exits the object.
-  String /*?*/ nextKey();
+  String? nextKey();
 
   /// The source of the nex key of the current object.
   ///
@@ -375,7 +402,7 @@ abstract class JsonReader<SourceSlice> {
   ///
   /// Returns `null` if there are no further entries,
   /// and exits the object.
-  SourceSlice /*?*/ nextKeySource();
+  SourceSlice? nextKeySource();
 
   /// The next object key, if it is in the list of candidates.
   ///
@@ -390,7 +417,7 @@ abstract class JsonReader<SourceSlice> {
   /// most JSON uses.
   /// If a match is found, the string object in the [candidates] list
   /// is returned rather than creating a new string.
-  String /*?*/ tryKey(List<String> candidates);
+  String? tryKey(List<String> candidates);
 
   /// Skips the next map entry, if there is one.
   ///
@@ -441,7 +468,8 @@ abstract class JsonReader<SourceSlice> {
   /// Returns a representation of the source corresponding
   /// to the skipped value. The kind of value returned
   /// depends on the implementation and source format.
-  /// May throw or return `null` if there is no next value.
+  ///
+  /// There must be a next value.
   SourceSlice expectAnyValueSource();
 
   /// Skips the next value.

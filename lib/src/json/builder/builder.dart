@@ -25,12 +25,12 @@ typedef JsonBuilder<T> = T Function(JsonReader);
 /// A JSON-like structure is either a number, a string, a boolean, `null`, or
 /// a `List<Object>` containing JSON-like structures, or a `Map<String, Object>`
 /// where the values are JSON-like structures.
-Object /*?*/ jsonValue(JsonReader reader) {
+Object? jsonValue(JsonReader reader) {
   if (reader.checkObject()) {
-    return jsonObject<Object /*?*/ >(jsonValue)(reader);
+    return jsonObject<Object? >(jsonValue)(reader);
   }
   if (reader.checkArray()) {
-    return jsonArray<Object /*?*/ >(jsonValue)(reader);
+    return jsonArray<Object? >(jsonValue)(reader);
   }
   if (reader.tryNull()) return null;
   return reader.tryNum() ??
@@ -65,7 +65,7 @@ bool jsonBool(JsonReader reader) => reader.expectBool();
 /// var optionalJsonInt = jsonOptional(jsonInt);
 /// var optionalInt = optionalJsonInt(reader);  // int or null
 /// ```
-JsonBuilder<T /*?*/ > jsonOptional<T>(JsonBuilder<T> builder) =>
+JsonBuilder<T? > jsonOptional<T>(JsonBuilder<T> builder) =>
     (JsonReader reader) => reader.tryNull() ? null : builder(reader);
 
 /// Reads an array of values from a [JsonReader].
@@ -124,11 +124,11 @@ JsonBuilder<T> jsonFoldArray<T, E>(JsonBuilder<E> elementBuilder,
 /// Reads a JSON object and builds a value for each object value
 /// using [valueBuilder]. Then creates a `Map<String, T>` of
 /// the keys and built values.
-JsonBuilder<Map<String, T>> jsonObject<T>(JsonBuilder<T> valueBuilder) =>
+JsonBuilder<Map<String?, T>> jsonObject<T>(JsonBuilder<T> valueBuilder) =>
     (JsonReader reader) {
       reader.expectObject();
-      var result = <String, T>{};
-      String key;
+      var result = <String?, T>{};
+      String? key;
       while ((key = reader.nextKey()) != null) {
         result[key] = valueBuilder(reader);
       }
@@ -145,20 +145,21 @@ JsonBuilder<Map<String, T>> jsonObject<T>(JsonBuilder<T> valueBuilder) =>
 /// The [defaultBuilder] is used if [valueBuilders] has no entry for
 /// a give key. If there is no [defaultBuilder] and not entry in
 /// [valueBuilders] for a key, then the entry is ignored.
-JsonBuilder<Map<String, T>> jsonStruct<T>(
+JsonBuilder<Map<String?, T>> jsonStruct<T>(
         Map<String, JsonBuilder<T>> valueBuilders,
-        [JsonBuilder<T> defaultBuilder]) =>
+        [JsonBuilder<T>? defaultBuilder]) =>
     (JsonReader reader) {
       reader.expectObject();
-      var result = <String, T>{};
-      String key;
-      while ((key = reader.nextKey()) != null) {
+      var result = <String?, T>{};
+      var key = reader.nextKey();
+      while (key != null) {
         var builder = valueBuilders[key] ?? defaultBuilder;
         if (builder != null) {
           result[key] = builder(reader);
         } else {
           reader.skipAnyValue();
         }
+        key = reader.nextKey();
       }
       return result;
     };
@@ -174,11 +175,11 @@ JsonBuilder<Map<String, T>> jsonStruct<T>(
 ///      combine(value, entry.key, entry.value));
 /// ```
 JsonBuilder<T> jsonFoldObject<T, E>(JsonBuilder<E> elementBuilder,
-        T initialValue(), T combine(T previus, String key, E elementValue)) =>
+        T initialValue(), T combine(T previus, String? key, E elementValue)) =>
     (JsonReader reader) {
       reader.expectObject();
       var result = initialValue();
-      String key;
+      String? key;
       while ((key = reader.nextKey()) != null) {
         var element = elementBuilder(reader);
         result = combine(result, key, element);

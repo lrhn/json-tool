@@ -18,7 +18,7 @@ import "sink.dart";
 ///
 /// The resulting string representation is a minimal JSON text with no
 /// whitespace between tokens.
-class JsonStringWriter implements JsonSink {
+class JsonStringWriter implements JsonWriter<String> {
   final StringSink _sink;
   final bool _asciiOnly;
   String _separator = "";
@@ -62,7 +62,7 @@ class JsonStringWriter implements JsonSink {
     _separator = ",";
   }
 
-  void addNumber(num value) {
+  void addNumber(num? value) {
     _sink.write(_separator);
     _sink.write(value);
     _separator = ",";
@@ -85,18 +85,24 @@ class JsonStringWriter implements JsonSink {
     _writeString(_sink, value, _asciiOnly);
     _separator = ",";
   }
+
+  void addSourceValue(String source) {
+    _sink.write(_separator);
+    _sink.write(source);
+    _separator = ",";
+  }
 }
 
 /// A [JsonSink] which builds a pretty textual representation of the JSON.
 ///
 /// The textual representation is spread on multiple lines and
 /// the content of JSON arrays or objects are indented.
-class JsonPrettyStringWriter implements JsonSink {
+class JsonPrettyStringWriter implements JsonWriter<String> {
   final StringSink _sink;
   final bool _asciiOnly;
   final String _indentString;
   int _indent = 0;
-  String _separator = "";
+  String? _separator = "";
 
   /// Creates a writer which writes the result into [target].
   ///
@@ -160,7 +166,7 @@ class JsonPrettyStringWriter implements JsonSink {
     _separator = ",";
   }
 
-  void addNumber(num value) {
+  void addNumber(num? value) {
     _writeSeparator();
     _sink.write(value);
     _separator = ",";
@@ -183,6 +189,12 @@ class JsonPrettyStringWriter implements JsonSink {
   void addString(String value) {
     _writeSeparator();
     _writeString(_sink, value, _asciiOnly);
+    _separator = ",";
+  }
+
+  void addSourceValue(String source) {
+    _writeSeparator();
+    _sink.write(source);
     _separator = ",";
   }
 }

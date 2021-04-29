@@ -86,7 +86,7 @@ class PlanetType {
   static const rock = PlanetType._("rock", "Rock Planet");
 
   /// Look up a planet type by its [PlanetType.key].
-  static PlanetType fromKey(String key) => const {
+  static PlanetType? fromKey(String key) => const {
         "gas": gas,
         "ice": ice,
         "rock": rock,
@@ -118,9 +118,9 @@ class Planet {
 /// * `type`: A string. One of `"gas"`, `"ice"` or `"rock"`.
 Planet buildPlanet(JsonReader reader) {
   reader.expectObject();
-  String name;
-  PlanetType type;
-  double sizeIndex;
+  String? name;
+  PlanetType? type;
+  double? sizeIndex;
   loop:
   while (true) {
     switch (reader.tryKey(const ["name", "size", "type"])) {
@@ -184,14 +184,14 @@ List<Planet> buildPlanets(JsonReader reader) {
 }
 
 /// Example use.
-void main(List<String> args) {
+void main() {
   var reader = JsonReader.fromString(jsonText);
 
   var planets = buildPlanets(reader);
   for (var planet in planets) {
     var size = planet.sizeIndex;
     var volume = size * size * size;
-    print("${planet} is a ${planet.type} and has a volume "
+    print("$planet is a ${planet.type} and has a volume "
         "${volume.toStringAsFixed(2)} times that of the Earth");
   }
 }

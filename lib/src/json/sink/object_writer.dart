@@ -15,26 +15,30 @@
 import "sink.dart";
 
 /// A [JsonSink] which builds Dart object structures.
-class JsonObjectWriter implements JsonSink {
+///
+/// I only the plain [JsonSink] methods are used, in correct order,
+/// then the structure will represent valid JSON and can be traversed
+/// by the reader of [JsonReader.fromObject].
+class JsonObjectWriter implements JsonWriter<Object?> {
   /// The callback which is called for each complete JSON object.
   final void Function(dynamic) _result;
 
   /// Stack of objects or arrays being built, and pending [_key] values.
-  final List<Object /*?*/ > _stack = [];
+  final List<Object? > _stack = [];
 
   /// Last key added using [addKey].
-  String _key;
+  String? _key;
 
   JsonObjectWriter(this._result);
 
-  void _value(Object /*?*/ value) {
+  void _value(Object? value) {
     if (_stack.isEmpty) {
       _result(value);
       _key = null;
     } else {
       var top = _stack.last;
       if (_key != null) {
-        (top as Map<String, dynamic>)[_key] = value;
+        (top as Map<String?, dynamic>)[_key] = value;
         _key = null;
       } else {
         (top as List<dynamic>).add(value);
@@ -48,13 +52,13 @@ class JsonObjectWriter implements JsonSink {
 
   void endArray() {
     var array = _stack.removeLast();
-    _key = _stack.removeLast() as String;
+    _key = _stack.removeLast() as String?;
     _value(array);
   }
 
   void endObject() {
     var object = _stack.removeLast();
-    _key = _stack.removeLast() as String;
+    _key = _stack.removeLast() as String?;
     _value(object);
   }
 
@@ -66,7 +70,7 @@ class JsonObjectWriter implements JsonSink {
     _value(null);
   }
 
-  void addNumber(num value) {
+  void addNumber(num? value) {
     _value(value);
   }
 
@@ -84,5 +88,9 @@ class JsonObjectWriter implements JsonSink {
 
   void addString(String value) {
     _value(value);
+  }
+
+  void addSourceValue(Object? source) {
+    _value(source);
   }
 }
