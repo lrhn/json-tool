@@ -47,7 +47,7 @@ class ValidatingJsonSink implements JsonSink {
   }
 
   @override
-  void addNumber(num value) {
+  void addNumber(num? value) {
     _validator.value();
     _sink.addNumber(value);
   }

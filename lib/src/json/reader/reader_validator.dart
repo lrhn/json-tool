@@ -141,7 +141,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     _validator.startObject();
   }
 
-  String expectString([List<String> candidates]) {
+  String expectString([List<String>? candidates]) {
     _checkValueAllowed();
     var result = _reader.expectString(candidates);
     _validator.value();
@@ -161,21 +161,33 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return false;
   }
 
-  String nextKey() {
+  String? nextKey() {
     if (!_validator.allowsKey) {
       throw StateError("Does not allow key");
     }
     var result = _reader.nextKey();
     if (result == null) {
       _validator.endObject();
+      _needsHasNext = _validator.isArray;
     } else {
       _validator.key();
     }
-    _needsHasNext = _validator.isArray;
     return result;
   }
 
-  SourceSlice nextKeySource() {
+  bool hasNextKey() {
+    if (!_validator.allowsKey) {
+      throw StateError("Does not allow key");
+    }
+    var result = _reader.hasNextKey();
+    if (!result) {
+      _validator.endObject();
+      _needsHasNext = _validator.isArray;
+    }
+    return result;
+  }
+
+  SourceSlice? nextKeySource() {
     if (!_validator.allowsKey) {
       throw StateError("Does not allow key");
     }
@@ -247,7 +259,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return false;
   }
 
-  bool tryBool() {
+  bool? tryBool() {
     _checkValueAllowed();
     var result = _reader.tryBool();
     if (result != null) {
@@ -257,7 +269,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
-  double tryDouble() {
+  double? tryDouble() {
     _checkValueAllowed();
     var result = _reader.tryDouble();
     if (result != null) {
@@ -267,7 +279,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
-  int tryInt() {
+  int? tryInt() {
     _checkValueAllowed();
     var result = _reader.tryInt();
     if (result != null) {
@@ -277,7 +289,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
-  String tryKey(List<String> candidates) {
+  String? tryKey(List<String> candidates) {
     if (!areSorted(candidates)) {
       throw ArgumentError("Candidates are not sorted");
     }
@@ -300,7 +312,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return false;
   }
 
-  num tryNum() {
+  num? tryNum() {
     _checkValueAllowed();
     var result = _reader.tryNum();
     if (result != null) {
@@ -319,7 +331,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
-  String tryString([List<String> candidates]) {
+  String? tryString([List<String>? candidates]) {
     _checkValueAllowed();
     var result = _reader.tryString(candidates);
     if (result != null) {

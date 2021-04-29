@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export "json/builder/builder.dart";
+export "json/processor/processor.dart";
 export "json/reader/reader.dart";
 export "json/sink/sink.dart";
-export "json/builder/builder.dart";

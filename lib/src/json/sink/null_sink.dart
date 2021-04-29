@@ -24,7 +24,7 @@ class NullJsonSink implements JsonSink {
 
   void addNull() {}
 
-  void addNumber(num value) {}
+  void addNumber(num? value) {}
 
   void addString(String value) {}
 

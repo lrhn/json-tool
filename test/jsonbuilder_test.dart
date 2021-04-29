@@ -101,12 +101,12 @@ void main() {
 
   test("object fold builder", () {
     var objectFold =
-        jsonFoldObject(jsonInt, () => 0, (int a, String key, int b) => a + b);
+        jsonFoldObject(jsonInt, () => 0, (int a, String? key, int b) => a + b);
     expect(objectFold(read('{}')), 0);
     expect(objectFold(read('{"x": 1}')), 1);
     expect(objectFold(read('{"x": 1, "y": 2, "z": 3}')), 6);
     var objectFoldKey = jsonFoldObject(
-        jsonInt, () => [], (List a, String key, int b) => a..add(key)..add(b));
+        jsonInt, () => [], (List a, String? key, int b) => a..add(key)..add(b));
     expect(objectFoldKey(read('{"x": 1, "y": 2, "z": 3}')),
         ["x", 1, "y", 2, "z", 3]);
   });

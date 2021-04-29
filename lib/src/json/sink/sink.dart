@@ -45,7 +45,7 @@ import "string_writer.dart";
 /// are guaranteed to give a meaningful result.
 abstract class JsonSink {
   /// Called for a number value.
-  void addNumber(num value);
+  void addNumber(num? value);
 
   /// Called for a null value.
   void addNull();
@@ -90,6 +90,21 @@ abstract class JsonSink {
   void endObject();
 }
 
+/// A JSON sink which emits JSON source or JSON-like structures.
+///
+/// Allows injecting a value directly into the
+abstract class JsonWriter<T> implements JsonSink {
+  /// Adds a JSON value *as source* to the sink.
+  ///
+  /// Can be used where any of the `add` methods, like [addNumber],
+  /// would add a value.
+  /// The [source] becomes the next value. If the source object
+  /// does not have a correct format for a JSON value,
+  /// the result might be invalid, or require using
+  /// [JsonReader.expectAnyValueSource] to read back.
+  void addSourceValue(T source);
+}
+
 /// Creates a [JsonSink] which builds a JSON string.
 ///
 /// The string is written to [sink].
@@ -106,8 +121,8 @@ abstract class JsonSink {
 ///
 /// The returned sink is not reusable. After it has written a single JSON structure,
 /// it should not be used again.
-JsonSink jsonStringWriter(StringSink sink,
-    {String indent, bool asciiOnly = false}) {
+JsonWriter<String> jsonStringWriter(StringSink sink,
+    {String? indent, bool asciiOnly = false}) {
   if (indent == null) return JsonStringWriter(sink, asciiOnly: asciiOnly);
   return JsonPrettyStringWriter(sink, indent, asciiOnly: asciiOnly);
 }
@@ -118,7 +133,7 @@ JsonSink jsonStringWriter(StringSink sink,
 /// the [result] callback is called with the resulting object structure.
 ///
 /// When [result] is called, the returned sink is reset and can be reused.
-JsonSink jsonObjectWriter(void Function(Object /*?*/) result) =>
+JsonWriter<Object?> jsonObjectWriter(void Function(Object?) result) =>
     JsonObjectWriter(result);
 
 /// Wraps a [JsonSink] in a validating layer.

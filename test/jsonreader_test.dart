@@ -25,10 +25,31 @@ void main() {
         "string": mkStringReader,
         "utf8": mkByteReader,
         "object": mkObjectReader,
-      }[kind] /*!*/;
+      }[kind]!;
       testReader(reader);
     });
   }
+
+  test("StringSlice", () {
+    var slice = StringSlice("abcdefghijklmnop", 4, 12);
+    expect(slice.length, 8);
+    expect(slice.toString(), "efghijkl");
+    expect(slice.substring(2, 6), "ghij");
+
+    expect(slice.indexOf("kl"), 6);
+    expect(slice.indexOf("kl", 4), 6);
+    expect(slice.indexOf("kl", 4, 7), -1);
+    expect(slice.indexOf("ef"), 0);
+    expect(slice.indexOf("ef", 1), -1);
+    expect(slice.indexOf("klm"), -1);
+
+    expect(slice.contains("kl"), true);
+    expect(slice.contains("klm"), false);
+
+    var subslice = slice.subslice(2, 6);
+    expect(subslice.length, 4);
+    expect(subslice.toString(), "ghij");
+  });
 }
 
 void testReader(JsonReader read(String source)) {
@@ -116,7 +137,7 @@ void testReader(JsonReader read(String source)) {
     expect(g1.hasNext(), false); // [[,],[], [...],]
   });
 
-  test("parse object", () {
+  test("parse object using nextKey", () {
     var g1 = read(r' { "a": true, "b": 42 } ');
     g1.expectObject();
     expect(g1.nextKey(), "a");
@@ -124,6 +145,18 @@ void testReader(JsonReader read(String source)) {
     expect(g1.nextKey(), "b");
     expect(g1.expectInt(), 42);
     expect(g1.nextKey(), null);
+  });
+
+  test("parse object using hasNextKey", () {
+    var g1 = read(r' { "a": true, "b": 42 } ');
+    g1.expectObject();
+    expect(g1.hasNextKey(), true);
+    expect(g1.nextKey(), "a");
+    expect(g1.expectBool(), true);
+    expect(g1.hasNextKey(), true);
+    expect(g1.nextKey(), "b");
+    expect(g1.expectInt(), 42);
+    expect(g1.hasNextKey(), false);
   });
 
   test("parse empty object", () {
@@ -137,9 +170,10 @@ void testReader(JsonReader read(String source)) {
     g1.expectObject();
     expect(g1.nextKey(), "a");
     g1.expectObject();
+    expect(g1.hasNextKey(), true);
     expect(g1.nextKey(), "b");
     expect(g1.expectBool(), true);
-    expect(g1.nextKey(), null);
+    expect(g1.hasNextKey(), false);
     expect(g1.nextKey(), "c");
     g1.expectObject();
     expect(g1.nextKey(), "d");
@@ -153,6 +187,7 @@ void testReader(JsonReader read(String source)) {
     // JSON: {"a":[1,2.5]}  with all whitespaces between all tokens.
     var g1 = read('$ws{$ws"a"$ws:$ws[${ws}1$ws,${ws}2.5$ws]$ws}');
     g1.expectObject();
+    expect(g1.hasNextKey(), true);
     expect(g1.nextKey(), "a");
     g1.expectArray();
     expect(g1.hasNext(), true);
@@ -190,7 +225,7 @@ void testReader(JsonReader read(String source)) {
     expect(g1.nextKey(), null);
   });
 
-  test("expetAnyValue", () {
+  test("expectAnyValue", () {
     var g1 = read(r'{"a":["test"],"b":2}');
     g1.expectObject();
     var key = g1.nextKeySource();
@@ -202,7 +237,7 @@ void testReader(JsonReader read(String source)) {
     if (g1 is JsonReader<StringSlice>) {
       expect(key.toString(), r'"a"');
       expect(skipped.toString(), r'["test"]');
-    } else if (skipped is Uint8List) {
+    } else if (g1 is JsonReader<Uint8List>) {
       expect(key, r'"a"'.codeUnits);
       expect(skipped, r'["test"]'.codeUnits);
     } else {
@@ -362,9 +397,9 @@ void testReader(JsonReader read(String source)) {
 
 JsonReader mkStringReader(String source) => JsonReader.fromString(source);
 JsonReader mkByteReader(String source) =>
-    JsonReader.fromUtf8(utf8.encode(source));
+    JsonReader.fromUtf8(utf8.encode(source) as Uint8List);
 JsonReader mkObjectReader(String source) =>
-    JsonReader.fromObject(json.decode(source));
+    JsonReader.fromObject(jsonDecode(source));
 
 // Methods used to test validating reader.
 void expectNoValue(JsonReader validator) {
