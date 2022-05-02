@@ -1,3 +1,7 @@
+## 1.1.1-dev
+
+- Populate the pubspec's `repository` field.
+
 ## 1.1.0
 
 - Null safe.
