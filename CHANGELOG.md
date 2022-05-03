@@ -1,7 +1,7 @@
-## 1.1.1-dev
+## 1.1.1
 
 - Populate the pubspec's `repository` field.
-
+- Use `package:lints` for linting.
 ## 1.1.0
 
 - Null safe.

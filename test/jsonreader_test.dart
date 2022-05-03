@@ -52,7 +52,7 @@ void main() {
   });
 }
 
-void testReader(JsonReader read(String source)) {
+void testReader(JsonReader Function(String source) read) {
   test("parse int", () {
     var g1 = read("42");
     expect(g1.expectInt(), 42);

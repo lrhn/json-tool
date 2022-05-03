@@ -21,7 +21,7 @@ import "src/json_data.dart";
 void main() {
   test("simple rebuild", () {
     var simple = jsonDecode(simpleJson);
-    var builtSimple;
+    Object? builtSimple;
     JsonReader.fromString(simpleJson).expectAnyValue(jsonObjectWriter((result) {
       builtSimple = result;
     }));

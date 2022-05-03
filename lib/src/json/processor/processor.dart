@@ -243,6 +243,7 @@ class JsonSinkProcessor<Reader extends JsonReader, Sink extends JsonSink>
   /// Creat a JSON processor forwarding events to [sink].
   JsonSinkProcessor(this.sink);
 
+  @override
   bool processObject(Reader reader, String? key) {
     if (key != null) sink.addKey(key);
     reader.expectObject();
@@ -250,10 +251,12 @@ class JsonSinkProcessor<Reader extends JsonReader, Sink extends JsonSink>
     return true;
   }
 
+  @override
   void endObject(String? key) {
     sink.endObject();
   }
 
+  @override
   bool processArray(Reader reader, String? key) {
     if (key != null) sink.addKey(key);
     reader.expectArray();
@@ -261,26 +264,31 @@ class JsonSinkProcessor<Reader extends JsonReader, Sink extends JsonSink>
     return true;
   }
 
+  @override
   void endArray(String? key) {
     sink.endArray();
   }
 
+  @override
   void processNull(Reader reader, String? key) {
     if (key != null) sink.addKey(key);
     reader.expectNull();
     sink.addNull();
   }
 
+  @override
   void processBool(Reader reader, String? key) {
     if (key != null) sink.addKey(key);
     sink.addBool(reader.expectBool());
   }
 
+  @override
   void processNum(Reader reader, String? key) {
     if (key != null) sink.addKey(key);
     sink.addNumber(reader.expectNum());
   }
 
+  @override
   void processString(Reader reader, String? key) {
     if (key != null) sink.addKey(key);
     sink.addString(reader.expectString());

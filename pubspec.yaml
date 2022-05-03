@@ -22,4 +22,4 @@ environment:
 
 dev_dependencies:
   test: ^1.17.2
-  pedantic: ^1.11.0
+  lints: ^2.0.0

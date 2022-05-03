@@ -34,58 +34,68 @@ class JsonStringWriter implements JsonWriter<String> {
       : _sink = target,
         _asciiOnly = asciiOnly;
 
+  @override
   void addBool(bool value) {
     _sink.write(_separator);
     _sink.write(value);
     _separator = ",";
   }
 
+  @override
   void endArray() {
     _sink.write("]");
     _separator = ",";
   }
 
+  @override
   void endObject() {
     _sink.write("}");
     _separator = ",";
   }
 
+  @override
   void addKey(String key) {
     _sink.write(_separator);
     _writeString(_sink, key, _asciiOnly);
     _separator = ":";
   }
 
+  @override
   void addNull() {
     _sink.write(_separator);
     _sink.write("null");
     _separator = ",";
   }
 
+  @override
   void addNumber(num? value) {
     _sink.write(_separator);
     _sink.write(value);
     _separator = ",";
   }
 
+  @override
   void startArray() {
     _sink.write(_separator);
     _sink.write("[");
     _separator = "";
   }
 
+  @override
   void startObject() {
     _sink.write(_separator);
     _sink.write("{");
     _separator = "";
   }
 
+  @override
   void addString(String value) {
     _sink.write(_separator);
     _writeString(_sink, value, _asciiOnly);
     _separator = ",";
   }
 
+  @override
   void addSourceValue(String source) {
     _sink.write(_separator);
     _sink.write(source);
@@ -133,12 +143,14 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
     }
   }
 
+  @override
   void addBool(bool value) {
     _writeSeparator();
     _sink.write(value);
     _separator = ",";
   }
 
+  @override
   void endArray() {
     _indent--;
     _writeIndent();
@@ -146,6 +158,7 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
     _separator = ",";
   }
 
+  @override
   void endObject() {
     _indent--;
     _writeIndent();
@@ -153,6 +166,7 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
     _separator = ",";
   }
 
+  @override
   void addKey(String key) {
     _writeSeparator();
     _writeString(_sink, key, _asciiOnly);
@@ -160,18 +174,21 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
     _separator = null;
   }
 
+  @override
   void addNull() {
     _writeSeparator();
     _sink.write("null");
     _separator = ",";
   }
 
+  @override
   void addNumber(num? value) {
     _writeSeparator();
     _sink.write(value);
     _separator = ",";
   }
 
+  @override
   void startArray() {
     _writeSeparator();
     _sink.write("[");
@@ -179,6 +196,7 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
     _separator = "";
   }
 
+  @override
   void startObject() {
     _writeSeparator();
     _sink.write("{");
@@ -186,12 +204,14 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
     _separator = "";
   }
 
+  @override
   void addString(String value) {
     _writeSeparator();
     _writeString(_sink, value, _asciiOnly);
     _separator = ",";
   }
 
+  @override
   void addSourceValue(String source) {
     _writeSeparator();
     _sink.write(source);
@@ -199,8 +219,8 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
   }
 }
 
-void _writeString(StringSink _sink, String string, bool asciiOnly) {
-  _sink.write('"');
+void _writeString(StringSink sink, String string, bool asciiOnly) {
+  sink.write('"');
   var start = 0;
   for (var i = 0; i < string.length; i++) {
     var char = string.codeUnitAt(i);
@@ -208,38 +228,38 @@ void _writeString(StringSink _sink, String string, bool asciiOnly) {
         char == 0x22 ||
         char == 0x5c ||
         (asciiOnly && char > 0x7f)) {
-      if (i > start) _sink.write(string.substring(start, i));
+      if (i > start) sink.write(string.substring(start, i));
       switch (char) {
         case 0x08:
-          _sink.write(r"\b");
+          sink.write(r"\b");
           break;
         case 0x09:
-          _sink.write(r"\t");
+          sink.write(r"\t");
           break;
         case 0x0a:
-          _sink.write(r"\n");
+          sink.write(r"\n");
           break;
         case 0x0c:
-          _sink.write(r"\f");
+          sink.write(r"\f");
           break;
         case 0x0d:
-          _sink.write(r"\r");
+          sink.write(r"\r");
           break;
         case 0x22:
-          _sink.write(r'\"');
+          sink.write(r'\"');
           break;
         case 0x5c:
-          _sink.write(r"\\");
+          sink.write(r"\\");
           break;
         default:
-          _sink.write(char < 256
+          sink.write(char < 256
               ? (char < 0x10 ? r"\u000" : r"\u00")
               : (char < 0x1000 ? r"\u0" : r"\u"));
-          _sink.write(char.toRadixString(16));
+          sink.write(char.toRadixString(16));
       }
       start = i + 1;
     }
   }
-  if (start < string.length) _sink.write(string.substring(start));
-  _sink.write('"');
+  if (start < string.length) sink.write(string.substring(start));
+  sink.write('"');
 }

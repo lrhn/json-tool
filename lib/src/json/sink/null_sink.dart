@@ -18,21 +18,30 @@ import "sink.dart";
 class NullJsonSink implements JsonSink {
   const NullJsonSink();
 
+  @override
   void addBool(bool value) {}
 
+  @override
   void addKey(String key) {}
 
+  @override
   void addNull() {}
 
+  @override
   void addNumber(num? value) {}
 
+  @override
   void addString(String value) {}
 
+  @override
   void endArray() {}
 
+  @override
   void endObject() {}
 
+  @override
   void startArray() {}
 
+  @override
   void startObject() {}
 }

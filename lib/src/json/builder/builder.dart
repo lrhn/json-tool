@@ -27,10 +27,10 @@ typedef JsonBuilder<T> = T Function(JsonReader);
 /// where the values are JSON-like structures.
 Object? jsonValue(JsonReader reader) {
   if (reader.checkObject()) {
-    return jsonObject<Object? >(jsonValue)(reader);
+    return jsonObject<Object?>(jsonValue)(reader);
   }
   if (reader.checkArray()) {
-    return jsonArray<Object? >(jsonValue)(reader);
+    return jsonArray<Object?>(jsonValue)(reader);
   }
   if (reader.tryNull()) return null;
   return reader.tryNum() ??
@@ -65,7 +65,7 @@ bool jsonBool(JsonReader reader) => reader.expectBool();
 /// var optionalJsonInt = jsonOptional(jsonInt);
 /// var optionalInt = optionalJsonInt(reader);  // int or null
 /// ```
-JsonBuilder<T? > jsonOptional<T>(JsonBuilder<T> builder) =>
+JsonBuilder<T?> jsonOptional<T>(JsonBuilder<T> builder) =>
     (JsonReader reader) => reader.tryNull() ? null : builder(reader);
 
 /// Reads an array of values from a [JsonReader].
@@ -90,7 +90,7 @@ JsonBuilder<List<T>> jsonArray<T>(JsonBuilder<T> elementBuilder) =>
 /// building an array that alternates between two
 /// types.
 JsonBuilder<List<T>> jsonIndexedArray<T>(
-        JsonBuilder<T> elementBuilder(int index)) =>
+        JsonBuilder<T> Function(int index) elementBuilder) =>
     (JsonReader reader) {
       reader.expectArray();
       var result = <T>[];
@@ -107,8 +107,10 @@ JsonBuilder<List<T>> jsonIndexedArray<T>(
 /// Builds a value for each element using [elementBuilder],
 /// then folds those into a single value using [initialValue]
 /// and [combine], just like [Iterable.fold].
-JsonBuilder<T> jsonFoldArray<T, E>(JsonBuilder<E> elementBuilder,
-        T initialValue(), T combine(T previus, E elementValue)) =>
+JsonBuilder<T> jsonFoldArray<T, E>(
+        JsonBuilder<E> elementBuilder,
+        T Function() initialValue,
+        T Function(T previus, E elementValue) combine) =>
     (JsonReader reader) {
       reader.expectArray();
       var result = initialValue();
@@ -174,8 +176,10 @@ JsonBuilder<Map<String?, T>> jsonStruct<T>(
 ///  jsonObject(elementBuilder).entries.fold(initialValue(), (value, entry) =>
 ///      combine(value, entry.key, entry.value));
 /// ```
-JsonBuilder<T> jsonFoldObject<T, E>(JsonBuilder<E> elementBuilder,
-        T initialValue(), T combine(T previus, String? key, E elementValue)) =>
+JsonBuilder<T> jsonFoldObject<T, E>(
+        JsonBuilder<E> elementBuilder,
+        T Function() initialValue,
+        T Function(T previus, String? key, E elementValue) combine) =>
     (JsonReader reader) {
       reader.expectObject();
       var result = initialValue();

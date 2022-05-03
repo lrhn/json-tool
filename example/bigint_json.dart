@@ -48,6 +48,7 @@ class _BigIntJsonWriter
   _BigIntJsonWriter(StringSink sink, String? indent)
       : super(jsonStringWriter(sink, indent: indent));
 
+  @override
   void processUnknown(JsonReader<Object?> reader, String? key) {
     // The source of a JsonReader<Object?> is the unknown object.
     var value = reader.expectAnyValueSource();
@@ -60,11 +61,12 @@ class _BigIntJsonWriter
   }
 }
 
-class _BigIntJsonReader extends JsonSinkProcessor<JsonReader<StringSlice>,
-    JsonWriter<Object?>> {
+class _BigIntJsonReader
+    extends JsonSinkProcessor<JsonReader<StringSlice>, JsonWriter<Object?>> {
   _BigIntJsonReader(void Function(Object?) resultCallback)
       : super(jsonObjectWriter(resultCallback));
 
+  @override
   void processNum(JsonReader<StringSlice> reader, String? key) {
     if (key != null) sink.addKey(key);
     var copy = reader.copy();

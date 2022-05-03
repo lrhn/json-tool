@@ -40,40 +40,48 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     }
   }
 
+  @override
   bool checkArray() {
     _checkValueAllowed();
     return _reader.checkArray();
   }
 
+  @override
   bool checkBool() {
     _checkValueAllowed();
     return _reader.checkBool();
   }
 
+  @override
   bool checkNull() {
     _checkValueAllowed();
     return _reader.checkNull();
   }
 
+  @override
   bool checkNum() {
     _checkValueAllowed();
     return _reader.checkNum();
   }
 
+  @override
   bool checkObject() {
     _checkValueAllowed();
     return _reader.checkObject();
   }
 
+  @override
   bool checkString() {
     _checkValueAllowed();
     return _reader.checkString();
   }
 
+  @override
   JsonReader copy() {
     return _reader.copy();
   }
 
+  @override
   void expectAnyValue(JsonSink sink) {
     _checkValueAllowed();
     _reader.expectAnyValue(sink);
@@ -81,6 +89,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     _needsHasNext = _validator.isArray;
   }
 
+  @override
   SourceSlice expectAnyValueSource() {
     _checkValueAllowed();
     var result = _reader.expectAnyValueSource();
@@ -89,6 +98,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   void expectArray() {
     _checkValueAllowed();
     _reader.expectArray();
@@ -96,6 +106,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     _needsHasNext = true;
   }
 
+  @override
   bool expectBool() {
     _checkValueAllowed();
     var result = _reader.expectBool();
@@ -104,6 +115,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   double expectDouble() {
     _checkValueAllowed();
     var result = _reader.expectDouble();
@@ -112,6 +124,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   int expectInt() {
     _checkValueAllowed();
     var result = _reader.expectInt();
@@ -120,6 +133,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   void expectNull() {
     _checkValueAllowed();
     _reader.expectNull();
@@ -127,6 +141,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     _needsHasNext = _validator.isArray;
   }
 
+  @override
   num expectNum() {
     _checkValueAllowed();
     var result = _reader.expectNum();
@@ -135,12 +150,14 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   void expectObject() {
     _checkValueAllowed();
     _reader.expectObject();
     _validator.startObject();
   }
 
+  @override
   String expectString([List<String>? candidates]) {
     _checkValueAllowed();
     var result = _reader.expectString(candidates);
@@ -149,6 +166,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   bool hasNext() {
     if (!_needsHasNext) {
       throw StateError("Cannot use hasNext");
@@ -161,6 +179,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return false;
   }
 
+  @override
   String? nextKey() {
     if (!_validator.allowsKey) {
       throw StateError("Does not allow key");
@@ -175,6 +194,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   bool hasNextKey() {
     if (!_validator.allowsKey) {
       throw StateError("Does not allow key");
@@ -187,6 +207,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   SourceSlice? nextKeySource() {
     if (!_validator.allowsKey) {
       throw StateError("Does not allow key");
@@ -201,12 +222,14 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   void skipAnyValue() {
     _validator.value();
     _reader.skipAnyValue();
     _needsHasNext = _validator.isArray;
   }
 
+  @override
   void endArray() {
     if (!_validator.insideArray) {
       throw StateError("Not in array");
@@ -223,6 +246,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     _needsHasNext = _validator.isArray;
   }
 
+  @override
   void endObject() {
     if (!_validator.insideObject) {
       throw StateError("Not in object");
@@ -240,6 +264,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     _needsHasNext = _validator.isArray;
   }
 
+  @override
   bool skipObjectEntry() {
     _checkKeyAllowed();
     if (!_reader.skipObjectEntry()) {
@@ -249,6 +274,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return true;
   }
 
+  @override
   bool tryArray() {
     _checkValueAllowed();
     if (_reader.tryArray()) {
@@ -259,6 +285,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return false;
   }
 
+  @override
   bool? tryBool() {
     _checkValueAllowed();
     var result = _reader.tryBool();
@@ -269,6 +296,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   double? tryDouble() {
     _checkValueAllowed();
     var result = _reader.tryDouble();
@@ -279,6 +307,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   int? tryInt() {
     _checkValueAllowed();
     var result = _reader.tryInt();
@@ -289,6 +318,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   String? tryKey(List<String> candidates) {
     if (!areSorted(candidates)) {
       throw ArgumentError("Candidates are not sorted");
@@ -302,6 +332,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   bool tryNull() {
     _checkValueAllowed();
     if (_reader.tryNull()) {
@@ -312,6 +343,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return false;
   }
 
+  @override
   num? tryNum() {
     _checkValueAllowed();
     var result = _reader.tryNum();
@@ -322,6 +354,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   bool tryObject() {
     _checkValueAllowed();
     var result = _reader.tryObject();
@@ -331,6 +364,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
     return result;
   }
 
+  @override
   String? tryString([List<String>? candidates]) {
     _checkValueAllowed();
     var result = _reader.tryString(candidates);

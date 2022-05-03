@@ -91,6 +91,7 @@ class PlanetType {
         "ice": ice,
         "rock": rock,
       }[key];
+  @override
   String toString() => description;
 }
 
@@ -107,6 +108,7 @@ class Planet {
 
   Planet(this.name, this.sizeIndex, this.type);
 
+  @override
   String toString() => name;
 }
 

@@ -33,10 +33,12 @@ class JsonStringReader implements JsonReader<StringSlice> {
   FormatException _error(String message, [int? index]) =>
       FormatException(message, _source, index ?? _index);
 
+  @override
   void expectObject() {
     if (!tryObject()) throw _error("Not an object");
   }
 
+  @override
   bool tryObject() {
     var char = _nextNonWhitespaceChar();
     if (char == $lbrace) {
@@ -46,6 +48,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return false;
   }
 
+  @override
   String? nextKey() {
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) {
@@ -60,6 +63,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     throw _error("Not a string");
   }
 
+  @override
   bool hasNextKey() {
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) {
@@ -72,6 +76,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     throw _error("Not a string");
   }
 
+  @override
   StringSlice? nextKeySource() {
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) {
@@ -91,6 +96,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     throw _error("Not a string");
   }
 
+  @override
   String? tryKey(List<String> candidates) {
     assert(areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
@@ -163,6 +169,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return null;
   }
 
+  @override
   bool skipObjectEntry() {
     var nextChar = _nextNonWhitespaceChar();
     var index = _index;
@@ -181,14 +188,17 @@ class JsonStringReader implements JsonReader<StringSlice> {
     throw _error("Not an Object entry", index);
   }
 
+  @override
   void endObject() {
     _skipUntil($rbrace);
   }
 
+  @override
   void expectArray() {
     if (!tryArray()) throw _error("Not an array");
   }
 
+  @override
   bool tryArray() {
     var char = _nextNonWhitespaceChar();
     if (char == $lbracket) {
@@ -198,6 +208,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return false;
   }
 
+  @override
   bool hasNext() {
     var char = _nextNonWhitespaceChar();
     if (char == $comma) {
@@ -213,6 +224,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return false;
   }
 
+  @override
   void endArray() {
     _skipUntil($rbracket);
   }
@@ -249,6 +261,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return false;
   }
 
+  @override
   String expectString([List<String>? candidates]) {
     assert(candidates == null || areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
@@ -341,6 +354,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return _index;
   }
 
+  @override
   bool? tryBool() {
     var char = _nextNonWhitespaceChar();
     if (char == $t) {
@@ -355,8 +369,10 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return null;
   }
 
+  @override
   bool expectBool() => tryBool() ?? (throw _error("Not a boolean"));
 
+  @override
   bool tryNull() {
     var char = _nextNonWhitespaceChar();
     if (char == $n) {
@@ -367,12 +383,15 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return false;
   }
 
+  @override
   void expectNull() {
     tryNull() || (throw _error("Not null"));
   }
 
+  @override
   int expectInt() => _scanInt(true)!;
 
+  @override
   int? tryInt() => _scanInt(false);
 
   int? _scanInt(bool throws) {
@@ -414,12 +433,16 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return sign >= 0 ? result : -result;
   }
 
+  @override
   num expectNum() => _scanNumber(false, true)!;
 
+  @override
   num? tryNum() => _scanNumber(false, false);
 
+  @override
   double expectDouble() => _scanNumber(true, true) as double;
 
+  @override
   double? tryDouble() => _scanNumber(true, false) as double?;
 
   num? _scanNumber(bool asDouble, bool throws) {
@@ -471,8 +494,8 @@ class JsonStringReader implements JsonReader<StringSlice> {
         doubleResult = double.parse(slice);
       } on FormatException catch (e) {
         var offset = e.offset;
-        throw FormatException("Not a number", _source,
-            offset == null ? null : start + offset);
+        throw FormatException(
+            "Not a number", _source, offset == null ? null : start + offset);
       }
     } else {
       var result = double.tryParse(slice);
@@ -521,24 +544,31 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return -1;
   }
 
+  @override
   bool checkNum() {
     var char = _nextNonWhitespaceChar();
     return char == $minus || (char ^ $0) <= 9;
   }
 
+  @override
   bool checkBool() {
     var char = _nextNonWhitespaceChar();
     return char == $t || char == $f;
   }
 
+  @override
   bool checkString() => _nextNonWhitespaceChar() == $quot;
 
+  @override
   bool checkObject() => _nextNonWhitespaceChar() == $lbrace;
 
+  @override
   bool checkArray() => _nextNonWhitespaceChar() == $lbracket;
 
+  @override
   bool checkNull() => _nextNonWhitespaceChar() == $n;
 
+  @override
   void skipAnyValue() {
     _skipValue();
   }
@@ -590,6 +620,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     }
   }
 
+  @override
   StringSlice expectAnyValueSource() {
     var next = _nextNonWhitespaceChar();
     if (next < 0) return throw _error("Not a value");
@@ -599,6 +630,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return StringSlice(_source, start, end);
   }
 
+  @override
   String? tryString([List<String>? candidates]) {
     assert(candidates == null || areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
@@ -611,8 +643,10 @@ class JsonStringReader implements JsonReader<StringSlice> {
     return null;
   }
 
+  @override
   JsonStringReader copy() => JsonStringReader._(_source, _index);
 
+  @override
   void expectAnyValue(JsonSink sink) {
     var char = _nextNonWhitespaceChar();
     switch (char) {
@@ -724,5 +758,6 @@ class StringSlice {
         assert(end <= source.length);
 
   /// The slice string characters as a separate string.
+  @override
   String toString() => source.substring(start, end);
 }

@@ -24,7 +24,7 @@ class JsonObjectWriter implements JsonWriter<Object?> {
   final void Function(dynamic) _result;
 
   /// Stack of objects or arrays being built, and pending [_key] values.
-  final List<Object? > _stack = [];
+  final List<Object?> _stack = [];
 
   /// Last key added using [addKey].
   String? _key;
@@ -46,50 +46,60 @@ class JsonObjectWriter implements JsonWriter<Object?> {
     }
   }
 
+  @override
   void addBool(bool value) {
     _value(value);
   }
 
+  @override
   void endArray() {
     var array = _stack.removeLast();
     _key = _stack.removeLast() as String?;
     _value(array);
   }
 
+  @override
   void endObject() {
     var object = _stack.removeLast();
     _key = _stack.removeLast() as String?;
     _value(object);
   }
 
+  @override
   void addKey(String key) {
     _key = key;
   }
 
+  @override
   void addNull() {
     _value(null);
   }
 
+  @override
   void addNumber(num? value) {
     _value(value);
   }
 
+  @override
   void startArray() {
     _stack.add(_key);
     _stack.add(<dynamic>[]);
     _key = null;
   }
 
+  @override
   void startObject() {
     _stack.add(_key);
     _stack.add(<String, dynamic>{});
     _key = null;
   }
 
+  @override
   void addString(String value) {
     _value(value);
   }
 
+  @override
   void addSourceValue(Object? source) {
     _value(source);
   }

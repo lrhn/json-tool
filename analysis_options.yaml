@@ -11,9 +11,4 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-include: package:pedantic/analysis_options.yaml
-analyzer:
-  errors:
-    annotate_overrides: ignore
-    prefer_single_quotes: ignore
-    use_function_type_syntax_for_parameters: ignore
+include: package:lints/recommended.yaml

@@ -25,7 +25,7 @@ import "util.dart";
 /// * a string,
 /// * a list of JSON-like object structures or
 /// * a map from strings to JSON-like object structures.
-class JsonObjectReader implements JsonReader<Object? > {
+class JsonObjectReader implements JsonReader<Object?> {
   /// The next object to access.
   ///
   /// Is set to `#_none` when there are no next object available.
@@ -52,30 +52,37 @@ class JsonObjectReader implements JsonReader<Object? > {
   /// Used by [copy] to create a copy of this reader's state.
   JsonObjectReader._(this._next, this._stack);
 
+  @override
   bool checkArray() {
     return _next is List;
   }
 
+  @override
   bool checkBool() {
     return _next is bool;
   }
 
+  @override
   bool checkNull() {
     return _next == null;
   }
 
+  @override
   bool checkNum() {
     return _next is num;
   }
 
+  @override
   bool checkObject() {
     return _next is Map<String, dynamic>;
   }
 
+  @override
   bool checkString() {
     return _next is String;
   }
 
+  @override
   Object? expectAnyValueSource() {
     var result = _next;
     if (result == #_none) throw StateError("No value");
@@ -90,23 +97,32 @@ class JsonObjectReader implements JsonReader<Object? > {
     return FormatException(message, _next);
   }
 
+  @override
   void expectArray() => tryArray() || (throw _error("Not a JSON array"));
 
+  @override
   bool expectBool() => tryBool() ?? (throw _error("Not an boolean"));
 
+  @override
   double expectDouble() => tryDouble() ?? (throw _error("Not a double"));
 
+  @override
   int expectInt() => tryInt() ?? (throw _error("Not an integer"));
 
+  @override
   void expectNull() => tryNull() || (throw _error("Not null"));
 
+  @override
   num expectNum() => tryNum() ?? (throw _error("Not a number"));
 
+  @override
   void expectObject() => tryObject() || (throw _error("Not a JSON object"));
 
+  @override
   String expectString([List<String>? candidates]) =>
       tryString(candidates) ?? (throw _error("Not a string"));
 
+  @override
   bool hasNext() {
     if (_next == #_none) {
       var stack = _stack;
@@ -124,6 +140,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     throw StateError("Not before a JSON array element");
   }
 
+  @override
   String? nextKey() {
     if (_next == #_none) {
       var stack = _stack;
@@ -142,6 +159,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     throw StateError("Not before a JSON object key");
   }
 
+  @override
   bool hasNextKey() {
     if (_next == #_none) {
       var stack = _stack;
@@ -159,8 +177,10 @@ class JsonObjectReader implements JsonReader<Object? > {
     throw StateError("Not before a JSON object key");
   }
 
+  @override
   String? nextKeySource() => nextKey();
 
+  @override
   bool tryArray() {
     var current = _next;
     if (current is List<dynamic>) {
@@ -174,6 +194,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return false;
   }
 
+  @override
   bool? tryBool() {
     var current = _next;
     if (current is bool) {
@@ -186,6 +207,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return null;
   }
 
+  @override
   double? tryDouble() {
     var current = _next;
     if (current is num) {
@@ -198,6 +220,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return null;
   }
 
+  @override
   int? tryInt() {
     var current = _next;
     if (current is int) {
@@ -207,6 +230,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return null;
   }
 
+  @override
   String? tryKey(List<String> candidates) {
     assert(areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
@@ -229,6 +253,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     throw StateError("Not before a JSON object key");
   }
 
+  @override
   bool tryNull() {
     var current = _next;
     if (current == null) {
@@ -241,6 +266,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return false;
   }
 
+  @override
   num? tryNum() {
     var current = _next;
     if (current is num) {
@@ -253,6 +279,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return null;
   }
 
+  @override
   bool tryObject() {
     var current = _next;
     if (current is Map<String, dynamic>) {
@@ -266,6 +293,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return false;
   }
 
+  @override
   String? tryString([List<String>? candidates]) {
     var current = _next;
     if (current is String) {
@@ -284,6 +312,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     return null;
   }
 
+  @override
   void skipAnyValue() {
     if (_next == #_none) {
       throw StateError("No value");
@@ -291,6 +320,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     _next = #_none;
   }
 
+  @override
   void endArray() {
     var stack = _stack;
     while (stack != null) {
@@ -304,6 +334,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     throw StateError("Not inside a JSON array");
   }
 
+  @override
   void endObject() {
     var stack = _stack;
     while (stack != null) {
@@ -317,6 +348,7 @@ class JsonObjectReader implements JsonReader<Object? > {
     throw StateError("Not inside a JSON object");
   }
 
+  @override
   bool skipObjectEntry() {
     if (_next == #_none) {
       var stack = _stack?.asMap;
@@ -331,8 +363,10 @@ class JsonObjectReader implements JsonReader<Object? > {
     throw StateError("Not before a JSON object key");
   }
 
+  @override
   JsonObjectReader copy() => JsonObjectReader._(_next, _stack?.copy());
 
+  @override
   void expectAnyValue(JsonSink sink) {
     void emitValue() {
       if (tryObject()) {
@@ -398,13 +432,16 @@ class _ListStack extends _Stack {
       : elements = list,
         super(parent);
 
+  @override
   bool get isList => true;
+  @override
   _ListStack get asList => this;
 
   bool get hasNext => index < elements.length;
   dynamic peek() => hasNext ? elements[index] : null;
   dynamic moveNext() => hasNext ? elements[index++] : null;
 
+  @override
   _ListStack copy() => _ListStack(elements, next?.copy())..index = index;
 }
 
@@ -428,8 +465,11 @@ class _MapStack extends _Stack {
 
   dynamic valueOf(String key) => map[key];
 
+  @override
   bool get isMap => true;
+  @override
   _MapStack get asMap => this;
 
+  @override
   _MapStack copy() => _MapStack._(map, keys, index, next?.copy());
 }
