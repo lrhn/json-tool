@@ -39,26 +39,19 @@ new source: {"x":123456789123456789123456789123456789}
 void main() {
   group("Ensure examples are running:", () {
     test("planets", () {
-      capturePrint(() {
-        planets.main();
-      }, expected: planetsOutput);
+      expect(capturePrint(planets.main), planetsOutput);
     });
     test("bigint", () {
-      capturePrint(() {
-        bigint.main();
-      }, expected: bigintOutput);
+      expect(capturePrint(bigint.main), bigintOutput);
     });
   });
 }
 
-// Avoids prints going to the console.
-void capturePrint(void Function() action, {String? expected}) {
+// Captures *synchronous* prints, avoids them going to the console.
+String capturePrint(void Function() action) {
   var capture = StringBuffer();
-  runZoned(action,
-      zoneSpecification: ZoneSpecification(print: (s, p, z, text) {
-        capture.writeln(text);
-      }));
-  if (expected != null) {
-    expect(capture.toString(), expected);
-  }
+  runZoned(action, zoneSpecification: ZoneSpecification(print: (s, p, z, text) {
+    capture.writeln(text);
+  }));
+  return capture.toString();
 }
