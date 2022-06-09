@@ -343,6 +343,7 @@ class JsonObjectReader implements JsonReader<Object? > {
           emitValue();
           key = nextKey();
         }
+        sink.endObject();
         return;
       }
       if (tryArray()) {
@@ -350,6 +351,7 @@ class JsonObjectReader implements JsonReader<Object? > {
         while (hasNext()) {
           emitValue();
         }
+        sink.endArray();
         return;
       }
       if (tryNull()) {
