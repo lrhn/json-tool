@@ -19,7 +19,7 @@
 /// Choosing other representations is a matter of adapting the
 /// `processNum`/`processUnknown` overrides in the [JsonProcessor]
 /// sub-classes.
-import 'package:jsontool/jsontool.dart';
+import "package:jsontool/jsontool.dart";
 
 /// Parses a JSON string into JSON-like object structure.
 ///

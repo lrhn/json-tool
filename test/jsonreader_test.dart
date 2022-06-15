@@ -15,8 +15,8 @@
 import "dart:convert";
 import "dart:typed_data";
 
-import "package:test/test.dart";
 import "package:jsontool/jsontool.dart";
+import "package:test/test.dart";
 
 void main() {
   for (var kind in ["string", "utf8", "object"]) {
@@ -93,7 +93,7 @@ void testReader(JsonReader Function(String source) read) {
     var g2a = read(r'"\n"');
     expect(g2a.expectString(), "\n");
     var g3 = read(r'"\b\t\n\r\f\\\"\/\ufffd"');
-    expect(g3.expectString(), "\b\t\n\r\f\\\"/\ufffd");
+    expect(g3.expectString(), '\b\t\n\r\f\\"/\ufffd');
   });
 
   test("parse array", () {

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:jsontool/src/json/json_structure_validator.dart';
+import "../json_structure_validator.dart";
 
 import "sink.dart";
 

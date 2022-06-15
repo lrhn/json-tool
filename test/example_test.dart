@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
+import "dart:async";
 
-import 'package:test/test.dart';
-import '../example/planets_json.dart' as planets;
-import '../example/bigint_json.dart' as bigint;
+import "package:test/test.dart";
+
+import "../example/bigint_json.dart" as bigint;
+import "../example/planets_json.dart" as planets;
 
 const planetsOutput = """
 Mercury is a Rock Planet and has a volume 0.05 times that of the Earth

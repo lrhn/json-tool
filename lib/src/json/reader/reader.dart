@@ -15,10 +15,10 @@
 import "dart:typed_data";
 
 import "../sink/sink.dart";
-import "string_reader.dart";
 import "byte_reader.dart";
 import "object_reader.dart";
 import "reader_validator.dart";
+import "string_reader.dart";
 
 export "string_reader.dart" show StringSlice;
 
