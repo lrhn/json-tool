@@ -14,8 +14,9 @@
 
 // A generalized processor for JSON source which takes elements from a
 // reader, then leaves the processing to user overridable methods.
-import '../sink/sink.dart';
-import '../reader/reader.dart';
+
+import "../reader/reader.dart";
+import "../sink/sink.dart";
 
 /// A generalized JSON processor.
 ///

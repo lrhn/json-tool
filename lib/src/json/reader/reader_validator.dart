@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import "../json_structure_validator.dart";
-import '../sink/sink.dart';
+import "../sink/sink.dart";
 import "reader.dart";
 import "util.dart";
 

@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const simpleJson = '''{
+const simpleJson = '''
+{
   "key1": ["value11", "value12"],
   "key2": ["value21"],
   "key3": []
 }''';
 
-const complexJson = r'''[
+const complexJson = r'''
+[
   0,
   1.1e+2,
   1.1e-2,

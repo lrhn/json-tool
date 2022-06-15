@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "package:test/test.dart";
 import "package:jsontool/jsontool.dart";
+import "package:test/test.dart";
 
 void main() {
-  test('simple rebuild object', () {
-    Object? jsonObject = {'a': 1, 'b': 2};
+  test("simple rebuild object", () {
+    Object? jsonObject = {"a": 1, "b": 2};
 
     final jsonReader = JsonReader.fromObject(jsonObject);
 
@@ -30,7 +30,7 @@ void main() {
     expect(newJson, jsonObject);
   });
 
-  test('simple rebuild array', () {
+  test("simple rebuild array", () {
     Object? jsonObject = [1, 2, 3];
 
     final jsonReader = JsonReader.fromObject(jsonObject);

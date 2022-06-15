@@ -1,3 +1,9 @@
+## 1.1.2
+
+- Optimizes to avoid or cheapen `as` casts where possible.
+  Uses `as dynamic` with a context type where a cast cannot be avoided,
+  for better dart2js performance.
+
 ## 1.1.1
 
 - Populate the pubspec's `repository` field.

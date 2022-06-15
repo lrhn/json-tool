@@ -13,8 +13,9 @@
 // limitations under the License.
 
 import "dart:convert";
-import "package:test/test.dart";
+
 import "package:jsontool/jsontool.dart";
+import "package:test/test.dart";
 
 import "src/json_data.dart";
 

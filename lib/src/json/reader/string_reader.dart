@@ -440,10 +440,10 @@ class JsonStringReader implements JsonReader<StringSlice> {
   num? tryNum() => _scanNumber(false, false);
 
   @override
-  double expectDouble() => _scanNumber(true, true) as double;
+  double expectDouble() => _scanNumber(true, true) as dynamic;
 
   @override
-  double? tryDouble() => _scanNumber(true, false) as double?;
+  double? tryDouble() => _scanNumber(true, false) as dynamic;
 
   num? _scanNumber(bool asDouble, bool throws) {
     var char = _nextNonWhitespaceChar();

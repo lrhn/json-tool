@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import "package:test/test.dart";
 import "package:jsontool/jsontool.dart";
+import "package:test/test.dart";
 
 void main() {
   JsonReader read(String source) => JsonReader.fromString(source);
@@ -106,7 +106,11 @@ void main() {
     expect(objectFold(read('{"x": 1}')), 1);
     expect(objectFold(read('{"x": 1, "y": 2, "z": 3}')), 6);
     var objectFoldKey = jsonFoldObject(
-        jsonInt, () => [], (List a, String? key, int b) => a..add(key)..add(b));
+        jsonInt,
+        () => [],
+        (List a, String? key, int b) => a
+          ..add(key)
+          ..add(b));
     expect(objectFoldKey(read('{"x": 1, "y": 2, "z": 3}')),
         ["x", 1, "y", 2, "z", 3]);
   });
