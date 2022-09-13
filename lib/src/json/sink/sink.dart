@@ -66,7 +66,7 @@ abstract class JsonSink {
   /// Ends the current array.
   ///
   /// The array value is now complete, and should
-  /// be treated as a value of a surrounding array or obejct.
+  /// be treated as a value of a surrounding array or object.
   void endArray();
 
   /// Called at the beginning of an object value.
@@ -74,19 +74,19 @@ abstract class JsonSink {
   /// Each value added until a corresponding [endObject]
   /// is considered an entry value of this object, unless it's part of a nested
   /// array or object.
-  /// Each such added value must be preceeded by exactly one call to [addKey]
+  /// Each such added value must be preceded by exactly one call to [addKey]
   /// which provides the corresponding key.
   void startObject();
 
   /// Sets the key for the next value of an object.
   ///
-  /// Should preceed any value or array/object start inside an object.
+  /// Should precede any value or array/object start inside an object.
   void addKey(String key);
 
   /// Ends the current object.
   ///
   /// The object value is now complete, and should
-  /// be treated as a value of a surrounding array or obejct.
+  /// be treated as a value of a surrounding array or object.
   void endObject();
 }
 
