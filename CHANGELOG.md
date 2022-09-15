@@ -1,3 +1,8 @@
+## 1.1.3
+
+- Typos fixed.
+- Bug in `byte_reader.dart` fixed.
+
 ## 1.1.2
 
 - Optimizes to avoid or cheapen `as` casts where possible.
