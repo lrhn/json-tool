@@ -705,7 +705,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
         return;
       case $lbrace:
         _index++;
-        sink.startArray();
+        sink.startObject();
         var key = nextKey();
         while (key != null) {
           sink.addKey(key);
