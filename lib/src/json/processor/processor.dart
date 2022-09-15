@@ -64,7 +64,7 @@ abstract class JsonProcessor<Reader extends JsonReader> {
   /// or [processObject] depending on what the next
   /// value of the reader is.
   /// If there is no value, or the reader has values
-  /// which do not match a JSON type, the [processUnkown]
+  /// which do not match a JSON type, the [processUnknown]
   /// method is called instead. This allows handling of
   /// unknown values in readers supporting that.
   void processValue(Reader reader, [String? key]) {
