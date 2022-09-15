@@ -390,6 +390,7 @@ class JsonObjectReader implements JsonReader<Object?> {
       }
       if (tryNull()) {
         sink.addNull();
+        return;
       }
       var number = tryNum();
       if (number != null) {

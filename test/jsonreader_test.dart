@@ -216,7 +216,7 @@ void testReader(JsonReader Function(String source) read) {
   });
 
   test("skipAnyValue", () {
-    var g1 = read(r'{"a":[[[[{"a":2}]]]],"b":2}');
+    var g1 = read(r'{"a":[[[[{"a":2},null,true,false,[],{},"YES"]]]],"b":2}');
     g1.expectObject();
     expect(g1.nextKey(), "a");
     g1.skipAnyValue();
@@ -226,6 +226,24 @@ void testReader(JsonReader Function(String source) read) {
   });
 
   test("expectAnyValue", () {
+    var anyValue = r'[[[[{"a":2},null,true,false,[],{},"YES"]]]]';
+
+    var g1 = read('{"a":$anyValue,"b":2}');
+    g1.expectObject();
+    expect(g1.nextKey(), "a");
+
+    var out = StringBuffer();
+    var w = jsonStringWriter(out);
+    g1.expectAnyValue(w);
+    var skipped = out.toString();
+    expect(skipped, anyValue);
+
+    expect(g1.nextKey(), "b");
+    expect(g1.expectInt(), 2);
+    expect(g1.nextKey(), null);
+  });
+
+  test("expectAnyValueSource", () {
     var g1 = read(r'{"a":["test"],"b":2}');
     g1.expectObject();
     var key = g1.nextKeySource();
