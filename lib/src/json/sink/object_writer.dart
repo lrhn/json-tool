@@ -96,7 +96,7 @@ class JsonObjectWriter implements JsonWriter<Object?> {
   void startArray() {
     var array = <dynamic>[];
     _stack.add(_key);
-    _stack.add(<dynamic>[]);
+    _stack.add(array);
     _topArrayCache = array;
     _topObjectCache = null;
     _key = null;

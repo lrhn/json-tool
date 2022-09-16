@@ -46,7 +46,7 @@ void main() {
       createSink: () => jsonObjectWriter((out) => result = out),
       parsedResult: () => jsonEncode(result),
     );
-  }, skip: 'broken test left as an exercise to the reader');
+  });
 
   group('jsonStringWriter', () {
     var buffer = StringBuffer();
