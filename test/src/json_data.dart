@@ -26,7 +26,7 @@ const complexJson = r'''
   1.1e-2,
   "",
   "abc",
-  "ab\n\r\h\b\f\"\\\/z",
+  "ab\n\r\b\f\"\\\/z",
   true,
   false,
   null,

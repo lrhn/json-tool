@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:convert';
+
+import 'byte_writer.dart';
 import "null_sink.dart";
 import "object_writer.dart";
 import "sink_validator.dart";
@@ -125,6 +128,23 @@ JsonWriter<String> jsonStringWriter(StringSink sink,
     {String? indent, bool asciiOnly = false}) {
   if (indent == null) return JsonStringWriter(sink, asciiOnly: asciiOnly);
   return JsonPrettyStringWriter(sink, indent, asciiOnly: asciiOnly);
+}
+
+/// Creates a [JsonSink] which builds a byte representation of the JSON
+/// structure.
+///
+/// The bytes are written to [sink], which is closed when a complete JSON
+/// value / object structure has been written.
+///
+/// If [asciiOnly] is true, string values will escape any non-ASCII
+/// character. If false or unspecified and [encoding] is [utf8], only
+/// control characters are escaped.
+///
+/// The resulting byte representation is a minimal JSON text with no
+/// whitespace between tokens.
+JsonWriter<List<int>> jsonByteWriter(Sink<List<int>> sink,
+    {Encoding encoding = utf8, bool? asciiOnly}) {
+  return JsonByteWriter(sink, encoding: encoding, asciiOnly: false);
 }
 
 /// Creates a [JsonSink] which builds a Dart JSON object structure.

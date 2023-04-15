@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import "dart:convert";
+import 'dart:io';
+import 'dart:typed_data';
 
 import "package:jsontool/jsontool.dart";
 import "package:test/test.dart";
@@ -34,6 +36,37 @@ void main() {
     var buffer = StringBuffer();
     JsonReader.fromString(simpleJson).expectAnyValue(jsonStringWriter(buffer));
     expect(simple, buffer.toString());
+  });
+
+  group('jsonObjectWriter', () {
+    Object? result;
+    setUp(() => result = null);
+
+    testJsonSink(
+      createSink: () => jsonObjectWriter((out) => result = out),
+      parsedResult: () => jsonEncode(result),
+    );
+  });
+
+  group('jsonStringWriter', () {
+    var buffer = StringBuffer();
+    setUp(() => buffer.clear());
+
+    testJsonSink(
+      createSink: () => jsonStringWriter(buffer),
+      parsedResult: () => buffer.toString(),
+    );
+  });
+
+  group('jsonByteWriter', () {
+    var builder = BytesBuilder();
+    setUp(() => builder.clear());
+
+    testJsonSink(
+      createSink: () =>
+          jsonByteWriter(ByteConversionSink.withCallback(builder.add)),
+      parsedResult: () => utf8.decode(builder.toBytes()),
+    );
   });
 
   group("validating sink,", () {
@@ -70,6 +103,23 @@ void main() {
       sink.endArray();
       expectDone(sink);
     });
+  });
+}
+
+void testJsonSink({
+  required JsonSink Function() createSink,
+  required String Function() parsedResult,
+}) {
+  test('simple', () {
+    JsonReader.fromString(simpleJson).expectAnyValue(createSink());
+    var simple = jsonEncode(jsonDecode(simpleJson));
+    expect(parsedResult(), simple);
+  });
+
+  test('complex', () {
+    var complex = jsonEncode(jsonDecode(complexJson));
+    JsonReader.fromString(complexJson).expectAnyValue(createSink());
+    expect(parsedResult(), complex);
   });
 }
 
