@@ -338,8 +338,8 @@ class JsonByteReader implements JsonReader<Uint8List> {
   FormatException _badUtf8() =>
       throw FormatException("Invalid UTF-8", _source, _index - 1);
 
-  String _stringFrom(int start, int end) => String.fromCharCodes(
-      _source.buffer.asUint8List(_source.offsetInBytes + start, end - start));
+  String _stringFrom(int start, int end) =>
+      String.fromCharCodes(_source, start, end);
 
   int _scanEscape(StringBuffer buffer, int escapeChar) {
     switch (escapeChar) {
@@ -523,8 +523,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
       _index = index;
       return sign >= 0 ? result : -result;
     }
-    var slice = String.fromCharCodes(_source.buffer
-        .asUint8List(_source.offsetInBytes + start, index - start));
+    var slice = String.fromCharCodes(_source, start, index);
     var doubleResult = 0.0;
     if (throws) {
       try {
