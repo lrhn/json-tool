@@ -143,8 +143,9 @@ JsonWriter<String> jsonStringWriter(StringSink sink,
 /// The resulting byte representation is a minimal JSON text with no
 /// whitespace between tokens.
 JsonWriter<List<int>> jsonByteWriter(Sink<List<int>> sink,
-    {Encoding encoding = utf8, bool? asciiOnly}) {
-  return JsonByteWriter(sink, encoding: encoding, asciiOnly: false);
+    {Encoding encoding = utf8, bool? asciiOnly, bool allowReuse = false}) {
+  return JsonByteWriter(sink,
+      encoding: encoding, asciiOnly: false, allowReuse: allowReuse);
 }
 
 /// Creates a [JsonSink] which builds a Dart JSON object structure.

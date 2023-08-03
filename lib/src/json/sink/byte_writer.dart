@@ -37,6 +37,7 @@ import "sink.dart";
 class JsonByteWriter implements JsonWriter<List<int>> {
   final Encoding _encoding;
   final bool _asciiOnly;
+  final bool _allowReuse;
   final Sink<List<int>> _target;
   StringConversionSink _sink;
   String _separator = "";
@@ -54,20 +55,21 @@ class JsonByteWriter implements JsonWriter<List<int>> {
   ///
   /// The resulting byte representation is a minimal JSON text with no
   /// whitespace between tokens.
-  JsonByteWriter(
-    Sink<List<int>> target, {
-    Encoding encoding = utf8,
-    bool? asciiOnly,
-  })  : _encoding = encoding,
+  JsonByteWriter(Sink<List<int>> target,
+      {Encoding encoding = utf8, bool? asciiOnly, bool allowReuse = false})
+      : _encoding = encoding,
         _target = target,
         _sink = encoding.encoder
             .startChunkedStringConversion(_NonClosingSink(target)),
-        _asciiOnly = asciiOnly ?? encoding != utf8;
+        _asciiOnly = asciiOnly ?? encoding != utf8,
+        _allowReuse = allowReuse;
 
   void _closeAtEnd() {
     if (_depth == 0) {
       _sink.close();
-      _target.close();
+      if (!_allowReuse) {
+        _target.close();
+      }
     }
   }
 
