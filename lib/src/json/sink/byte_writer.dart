@@ -37,7 +37,7 @@ import "sink.dart";
 class JsonByteWriter implements JsonWriter<List<int>> {
   final Encoding _encoding;
   final bool _asciiOnly;
-  final bool _allowReuse;
+  final bool _closeSink;
   final Sink<List<int>> _target;
   StringConversionSink _sink;
   String _separator = "";
@@ -46,32 +46,33 @@ class JsonByteWriter implements JsonWriter<List<int>> {
   /// Creates a [JsonSink] which builds a byte representation of the JSON
   /// structure.
   ///
-  /// The bytes are written to [sink], which is closed when a complete JSON
-  /// value / object structure has been written.
+  /// The bytes are written to [target], which is closed when a complete JSON
+  /// value / object structure has been written, using [Sink.close].
+  ///
+  /// If [closeSink], which defaults to `true`, is set to `false`, then the
+  /// [target] sink is *not* closed when a JSON value has been written, so
+  /// further bytes can be written to the sink, and this `JsonByteWriter`can
+  /// also be reused to write more JSON values to the same sink.
   ///
   /// If [asciiOnly] is true, string values will escape any non-ASCII
   /// character. If false or unspecified and [encoding] is [utf8], only
   /// control characters are escaped.
   ///
-  /// If [allowReuse] is true, the caller can continue on writing to [target]
-  /// even after this writer finishes its job. Therefore, it's caller
-  /// responsiblity to close the [target] sink.
-  ///
   /// The resulting byte representation is a minimal JSON text with no
   /// whitespace between tokens.
   JsonByteWriter(Sink<List<int>> target,
-      {Encoding encoding = utf8, bool? asciiOnly, bool allowReuse = false})
+      {Encoding encoding = utf8, bool? asciiOnly, bool closeSink = true})
       : _encoding = encoding,
         _target = target,
         _sink = encoding.encoder
             .startChunkedStringConversion(_NonClosingSink(target)),
         _asciiOnly = asciiOnly ?? encoding != utf8,
-        _allowReuse = allowReuse;
+        _closeSink = closeSink;
 
   void _closeAtEnd() {
     if (_depth == 0) {
       _sink.close();
-      if (!_allowReuse) {
+      if (_closeSink) {
         _target.close();
       }
     }
