@@ -46,17 +46,19 @@ class JsonByteWriter implements JsonWriter<List<int>> {
   /// Creates a [JsonSink] which builds a byte representation of the JSON
   /// structure.
   ///
-  /// The bytes are written to [target], which is closed when a complete JSON
-  /// value / object structure has been written, using [Sink.close].
-  ///
-  /// If [closeSink], which defaults to `true`, is set to `false`, then the
-  /// [target] sink is *not* closed when a JSON value has been written, so
-  /// further bytes can be written to the sink, and this `JsonByteWriter`can
-  /// also be reused to write more JSON values to the same sink.
+  /// The [target] sink is closed, using [Sink.close], when an entire JSON
+  /// value has been written.
   ///
   /// If [asciiOnly] is true, string values will escape any non-ASCII
   /// character. If false or unspecified and [encoding] is [utf8], only
   /// control characters are escaped.
+  ///
+  /// If [closeSink], which defaults to `true`, is set to `false`, then the
+  /// [target] sink is *not* closed when a JSON value has been written, so
+  /// further bytes can be written to the sink, and this `JsonByteWriter`can
+  /// also be reused to write more JSON values to the same sink. This also
+  /// means that, it is caller's responsibility to close the [target] when
+  /// [closeSink] is set to `false`.
   ///
   /// The resulting byte representation is a minimal JSON text with no
   /// whitespace between tokens.
