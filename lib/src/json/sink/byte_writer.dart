@@ -53,6 +53,10 @@ class JsonByteWriter implements JsonWriter<List<int>> {
   /// character. If false or unspecified and [encoding] is [utf8], only
   /// control characters are escaped.
   ///
+  /// If [allowReuse] is true, the caller can continue on writing to [target]
+  /// even after this writer finishes its job. Therefore, it's caller
+  /// responsiblity to close the [target] sink.
+  ///
   /// The resulting byte representation is a minimal JSON text with no
   /// whitespace between tokens.
   JsonByteWriter(Sink<List<int>> target,
