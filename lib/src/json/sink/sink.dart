@@ -95,7 +95,10 @@ abstract class JsonSink {
 
 /// A JSON sink which emits JSON source or JSON-like structures.
 ///
-/// Allows injecting a value directly into the
+/// The [addSourceValue] method injects the representation of a value directly
+/// as the target type [T], e.g., `String` or `List<int>` depending
+/// no what is being written to. Can be used with the value of
+/// [JsonReader.expectAnyValueSource] to avoid parsing a value.
 abstract class JsonWriter<T> implements JsonSink {
   /// Adds a JSON value *as source* to the sink.
   ///
@@ -122,8 +125,8 @@ abstract class JsonWriter<T> implements JsonSink {
 /// characters escaped. If not, only control characters, quotes and backslashes
 /// are escaped.
 ///
-/// The returned sink is not reusable. After it has written a single JSON structure,
-/// it should not be used again.
+/// The returned sink is not reusable. After it has written a single JSON
+/// structure, it should not be used again.
 JsonWriter<String> jsonStringWriter(StringSink sink,
     {String? indent, bool asciiOnly = false}) {
   if (indent == null) return JsonStringWriter(sink, asciiOnly: asciiOnly);

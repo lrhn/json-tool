@@ -1,3 +1,8 @@
+## 1.2.0
+
+- Allow SDK 3.0.0+.
+- Tweak `ByteWriter` implementation.
+
 ## 1.1.3
 
 - Typos fixed.
