@@ -56,7 +56,7 @@ import "../sink/sink.dart";
 ///     }
 ///   }
 /// ```
-abstract class JsonProcessor<Reader extends JsonReader> {
+abstract base class JsonProcessor<Reader extends JsonReader> {
   /// Process a JSON-value.
   ///
   /// Dispatches to one of [processNull], [processNum],
@@ -77,10 +77,8 @@ abstract class JsonProcessor<Reader extends JsonReader> {
       }
     } else if (reader.checkObject()) {
       if (processObject(reader, key)) {
-        var elementKey = reader.nextKey();
-        while (elementKey != null) {
-          processValue(reader, elementKey);
-          elementKey = reader.nextKey();
+        while (reader.hasNextKey()) {
+          processObjectEntry(reader);
         }
         endObject(key);
       }
@@ -131,6 +129,19 @@ abstract class JsonProcessor<Reader extends JsonReader> {
   bool processObject(Reader reader, String? key) {
     reader.expectObject();
     return true;
+  }
+
+  /// Called for each JSON object entry.
+  ///
+  /// Is called before each object entry key is processed.
+  /// The call must process the key and value.
+  /// The default behavior is to read the next key,
+  /// then call [processValue] with the reader and that key.
+  ///
+  /// A subclass can override this method to skip the entire entry using
+  /// [Reader.skipObjectEntry], before or after reading the key.
+  void processObjectEntry(Reader reader) {
+    processValue(reader, reader.nextKey());
   }
 
   /// Called after all key/value pairs of the current object are processed.
@@ -236,7 +247,7 @@ abstract class JsonProcessor<Reader extends JsonReader> {
 /// If overridden, the overriding method should make sure to call `addKey`
 /// on the sink first when the `key` is non-null, if it intends to add
 /// any value (and not add the key if it intends to skip the value).
-class JsonSinkProcessor<Reader extends JsonReader, Sink extends JsonSink>
+base class JsonSinkProcessor<Reader extends JsonReader, Sink extends JsonSink>
     extends JsonProcessor<Reader> {
   /// The target sink.
   final Sink sink;

@@ -21,7 +21,7 @@ import "sink.dart";
 /// Maintains an internal state machine which knows whether the sink is
 /// currently expecting a top-level value, an array value or an
 /// object key or value.
-class ValidatingJsonSink implements JsonSink {
+final class ValidatingJsonSink implements JsonSink {
   /// The original sink. All method calls are forwarded to this after validation.
   final JsonSink _sink;
 
@@ -49,7 +49,7 @@ class ValidatingJsonSink implements JsonSink {
   }
 
   @override
-  void addNumber(num? value) {
+  void addNumber(num value) {
     _validator.value();
     _sink.addNumber(value);
   }

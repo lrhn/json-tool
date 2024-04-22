@@ -15,7 +15,7 @@
 import "sink.dart";
 
 /// A [JsonSink] which does nothing.
-class NullJsonSink implements JsonSink {
+final class NullJsonSink implements JsonSink {
   const NullJsonSink();
 
   @override
@@ -28,7 +28,7 @@ class NullJsonSink implements JsonSink {
   void addNull() {}
 
   @override
-  void addNumber(num? value) {}
+  void addNumber(num value) {}
 
   @override
   void addString(String value) {}

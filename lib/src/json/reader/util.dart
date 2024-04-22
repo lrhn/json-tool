@@ -22,7 +22,44 @@ bool areSorted(List<String> candidates) {
   return true;
 }
 
+bool isWhitespace(int char) =>
+    char == $tab || char == $nl || char == $cr || char == $space;
+
+/// ASCII character table with mapping from JSON-significant characters
+/// to consecutive integers.
+///
+/// * `[`: 0
+/// * `{`: 1
+/// * `"`: 2
+/// * `t`: 3
+/// * `f`: 4
+/// * `n`: 5
+/// * `0`-`9`, `-`: 6
+/// * `,`: 7
+/// * `:`, 8
+const jsonCharacters =
+    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+    "\xFF\xFF\x02\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x07\x06\xFF\xFF"
+    "\x06\x06\x06\x06\x06\x06\x06\x06\x06\x06\x08\xFF\xFF\xFF\xFF\xFF"
+    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF"
+    "\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x00\xFF\xFF\xFF\xFF"
+    "\xFF\xFF\xFF\xFF\xFF\xFF\x04\xFF\xFF\xFF\xFF\xFF\xFF\xFF\x05\xFF"
+    "\xFF\xFF\xFF\xFF\x03\xFF\xFF\xFF\xFF\xFF\xFF\x01\xFF\xFF\xFF\xFF";
+
 // JSON-significant character constants used by JSON readers.
+
+/// Character `\t`.
+const int $tab = 0x09;
+
+/// Character `\n`.
+const int $nl = 0x0a;
+
+/// Character `\r`.
+const int $cr = 0x0d;
+
+/// Character space.
+const int $space = 0x20;
 
 /// Character `0`.
 const int $0 = 0x30;

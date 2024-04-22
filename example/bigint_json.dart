@@ -19,6 +19,8 @@
 /// Choosing other representations is a matter of adapting the
 /// `processNum`/`processUnknown` overrides in the [JsonProcessor]
 /// sub-classes.
+library;
+
 import "package:jsontool/jsontool.dart";
 
 /// Parses a JSON string into JSON-like object structure.
@@ -43,7 +45,7 @@ String serializeBigIntJson(Object? value, {String? indent}) {
   return buffer.toString();
 }
 
-class _BigIntJsonWriter
+final class _BigIntJsonWriter
     extends JsonSinkProcessor<JsonReader<Object?>, JsonWriter<String>> {
   _BigIntJsonWriter(StringSink sink, String? indent)
       : super(jsonStringWriter(sink, indent: indent));
@@ -61,7 +63,7 @@ class _BigIntJsonWriter
   }
 }
 
-class _BigIntJsonReader
+final class _BigIntJsonReader
     extends JsonSinkProcessor<JsonReader<StringSlice>, JsonWriter<Object?>> {
   _BigIntJsonReader(void Function(Object?) resultCallback)
       : super(jsonObjectWriter(resultCallback));
@@ -69,7 +71,6 @@ class _BigIntJsonReader
   @override
   void processNum(JsonReader<StringSlice> reader, String? key) {
     if (key != null) sink.addKey(key);
-    var copy = reader.copy();
     var source = reader.expectAnyValueSource().toString();
     assert(source.isNotEmpty);
     var result = BigInt.tryParse(source);
@@ -77,7 +78,7 @@ class _BigIntJsonReader
       sink.addSourceValue(result);
       return;
     }
-    sink.addNumber(copy.expectDouble());
+    sink.addNumber(double.parse(source));
   }
 }
 

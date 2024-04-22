@@ -34,7 +34,7 @@ import "sink.dart";
 ///
 /// The resulting string representation is a minimal JSON text with no
 /// whitespace between tokens.
-class JsonByteWriter implements JsonWriter<List<int>> {
+final class JsonByteWriter implements JsonWriter<List<int>> {
   final Encoding _encoding;
 
   /// String characters with value above this are hex-encoded,
@@ -142,7 +142,7 @@ class JsonByteWriter implements JsonWriter<List<int>> {
   }
 
   @override
-  void addNumber(num? value) {
+  void addNumber(num value) {
     _ensureSink()
       ..add(_separator)
       ..add(value.toString());

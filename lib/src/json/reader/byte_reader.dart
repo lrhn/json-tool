@@ -19,7 +19,7 @@ import "reader.dart";
 import "util.dart";
 
 /// A non-validating UTF-8 byte-based [JsonReader].
-class JsonByteReader implements JsonReader<Uint8List> {
+final class JsonByteReader implements JsonReader<Uint8List> {
   /// The _source string being read.
   final Uint8List _source;
 
@@ -115,6 +115,11 @@ class JsonByteReader implements JsonReader<Uint8List> {
     return result;
   }
 
+  /// Finds the start of the next key.
+  ///
+  /// Returns the code point for `"` if a string/key is found.
+  /// Returns the code point for `}` if the end of object is found.
+  /// Returns something else otherwise.
   int _nextKeyStart() {
     var char = _nextNonWhitespaceChar();
     if (char == $rbrace) {
@@ -130,12 +135,14 @@ class JsonByteReader implements JsonReader<Uint8List> {
 
   void _expectColon() {
     var char = _nextNonWhitespaceChar();
-    if (char != $colon) {
-      throw _error("Not a colon");
-    }
+    if (char != $colon) throw _error("Not a colon");
     _index++;
   }
 
+  /// Checks for a string literal containing an element of candidates.
+  ///
+  /// Must be positioned at a `"` character, and must not be empty.
+  /// The candidates must be sorted ASCII strings, and must not be empty.
   String? _tryCandidateString(List<String> candidates) {
     var min = 0;
     var max = candidates.length;
@@ -192,7 +199,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
 
   @override
   void expectArray() {
-    if (!tryArray()) throw _error("Not a JSON array");
+    if (!tryArray()) throw _error("Not an array");
   }
 
   @override
@@ -245,6 +252,10 @@ class JsonByteReader implements JsonReader<Uint8List> {
     return false;
   }
 
+  /// Skips to the end of a string.
+  ///
+  /// The start [_index] should be just after the leading quote
+  /// character of a string literal.
   bool _skipString() {
     while (_index < _source.length) {
       var char = _source[_index++];
@@ -256,6 +267,10 @@ class JsonByteReader implements JsonReader<Uint8List> {
 
   @override
   String expectString([List<String>? candidates]) {
+    assert(candidates == null || candidates.isNotEmpty,
+        throw ArgumentError.value(candidates, "candidates", "Are empty"));
+    assert(candidates == null || areSorted(candidates),
+        throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     var char = _nextNonWhitespaceChar();
     if (char != $quot) {
       throw _error("Not a string");
@@ -354,7 +369,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
             } else {
               char |= 0x20;
               if (char >= $a && char <= $f) {
-                value = value * 16 + (char - ($a - 10));
+                value = value * 16 + char - ($a - 10);
               } else {
                 throw _error("Invalid escape", _index - 1);
               }
@@ -420,7 +435,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
   }
 
   @override
-  void expectNull() {
+  Null expectNull() {
     tryNull() || (throw _error("Not null"));
   }
 
@@ -545,12 +560,8 @@ class JsonByteReader implements JsonReader<Uint8List> {
   int _nextNonWhitespaceChar() {
     while (_index < _source.length) {
       var char = _source[_index];
-      // Perfect hash for 0x09 (tab), 0x0a (nl), 0x0d (cr) and 0x20 (space).
-      var base = char -
-          0x9; // 0x00, 0x01, 0x04 or 0x17. Keep this because it only needs 5 bits.
-      var hash = (base | (base >> 1)) & 3; // 0x00, 0x01, 0x02 or 0x03
-      const table = (0x00 << 0) | (0x01 << 5) | (0x04 << 10) | (0x17 << 15);
-      if ((table >> (5 * hash)) & 0x1f == base) {
+      if (char <= 0x20) {
+        assert(isWhitespace(char), throw _error("Not valid character"));
         _index++;
         continue;
       }
@@ -567,12 +578,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
     var index = _index;
     while (index > 0) {
       var char = _source[--index];
-      // Perfect hash for 0x09 (tab), 0x0a (nl), 0x0d (cr) and 0x20 (space).
-      var base = char -
-          0x9; // 0x00, 0x01, 0x04 or 0x17. Keep this because it only needs 5 bits.
-      var hash = (base | (base >> 1)) & 3; // 0x00, 0x01, 0x02 or 0x03
-      const table = (0x00 << 0) | (0x01 << 5) | (0x04 << 10) | (0x17 << 15);
-      if ((table >> (5 * hash)) & 0x1f == base) {
+      if (isWhitespace(char)) {
         continue;
       }
       return char;
@@ -583,7 +589,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
   @override
   bool checkNum() {
     var char = _nextNonWhitespaceChar();
-    return char == $minus || (char ^ $0) <= 9;
+    return char ^ $0 <= 9 || char == $minus;
   }
 
   @override
@@ -605,7 +611,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
   bool checkNull() => _nextNonWhitespaceChar() == $n;
 
   @override
-  void skipAnyValue() {
+  Null skipAnyValue() {
     _skipValue();
   }
 
@@ -618,7 +624,7 @@ class JsonByteReader implements JsonReader<Uint8List> {
       _skipUntil($rbracket);
     } else if (char == $quot) {
       _skipString();
-    } else if (char == $minus || char ^ $0 <= 9) {
+    } else if (char ^ $0 <= 9 || char == $minus) {
       _skipNumber();
     } else if (char == $f || char == $t || char == $n) {
       _skipWord();
@@ -669,6 +675,10 @@ class JsonByteReader implements JsonReader<Uint8List> {
 
   @override
   String? tryString([List<String>? candidates]) {
+    assert(candidates == null || candidates.isNotEmpty,
+        throw ArgumentError.value(candidates, "candidates", "Are empty"));
+    assert(candidates == null || areSorted(candidates),
+        throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     if (_nextNonWhitespaceChar() == $quot) {
       if (candidates != null) {
         return _tryCandidateString(candidates);
@@ -691,51 +701,51 @@ class JsonByteReader implements JsonReader<Uint8List> {
   JsonByteReader copy() => JsonByteReader._(_source, _index);
 
   @override
-  void expectAnyValue(JsonSink sink) {
+  Null expectAnyValue(JsonSink sink) {
     var char = _nextNonWhitespaceChar();
-    switch (char) {
-      case $lbracket:
-        _index++;
-        sink.startArray();
-        while (hasNext()) {
-          expectAnyValue(sink);
-        }
-        sink.endArray();
-        return;
-      case $lbrace:
-        _index++;
-        sink.startObject();
-        var key = nextKey();
-        while (key != null) {
-          sink.addKey(key);
-          expectAnyValue(sink);
-          key = nextKey();
-        }
-        sink.endObject();
-        return;
-      case $quot:
-        sink.addString(_scanString());
-        return;
-      case $t:
-        assert(_startsWith("rue", _source, _index + 1));
-        _index += 4;
-        sink.addBool(true);
-        return;
-      case $f:
-        assert(_startsWith("alse", _source, _index + 1));
-        _index += 5;
-        sink.addBool(false);
-        return;
-      case $n:
-        assert(_startsWith("ull", _source, _index + 1));
-        _index += 4;
-        sink.addNull();
-        return;
-      default:
-        if (char == $minus || (char ^ 0x30) <= 9) {
-          sink.addNumber(_scanNumber(false, true));
+    if (char <= 0x7f) {
+      switch (jsonCharacters.codeUnitAt(char)) {
+        case 0: // $lbracket:
+          _index++;
+          sink.startArray();
+          while (hasNext()) {
+            expectAnyValue(sink);
+          }
+          sink.endArray();
           return;
-        }
+        case 1: // $lbrace:
+          _index++;
+          sink.startObject();
+          var key = nextKey();
+          while (key != null) {
+            sink.addKey(key);
+            expectAnyValue(sink);
+            key = nextKey();
+          }
+          sink.endObject();
+          return;
+        case 2: // $quot:
+          sink.addString(_scanString());
+          return;
+        case 3: // $t:
+          assert(_startsWith("rue", _source, _index + 1));
+          _index += 4;
+          sink.addBool(true);
+          return;
+        case 4: // $f:
+          assert(_startsWith("alse", _source, _index + 1));
+          _index += 5;
+          sink.addBool(false);
+          return;
+        case 5: // $n:
+          assert(_startsWith("ull", _source, _index + 1));
+          _index += 4;
+          sink.addNull();
+          return;
+        case 6: // $0-9, $minus:
+          sink.addNumber(_scanNumber(false, true)!);
+          return;
+      }
     }
     throw _error("Not a JSON value");
   }

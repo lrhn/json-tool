@@ -41,5 +41,6 @@
 ///
 /// The [JsonBuilder] functions provide a composable way to convert a
 /// JSON structure to another kind of value.
-/// library jsontool;
+library jsontool;
+
 export "src/jsontool.dart";

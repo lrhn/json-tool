@@ -18,7 +18,7 @@ import "sink.dart";
 ///
 /// The resulting string representation is a minimal JSON text with no
 /// whitespace between tokens.
-class JsonStringWriter implements JsonWriter<String> {
+final class JsonStringWriter implements JsonWriter<String> {
   final StringSink _sink;
   final bool _asciiOnly;
   String _separator = "";
@@ -68,7 +68,7 @@ class JsonStringWriter implements JsonWriter<String> {
   }
 
   @override
-  void addNumber(num? value) {
+  void addNumber(num value) {
     _sink.write(_separator);
     _sink.write(value);
     _separator = ",";
@@ -182,7 +182,7 @@ class JsonPrettyStringWriter implements JsonWriter<String> {
   }
 
   @override
-  void addNumber(num? value) {
+  void addNumber(num value) {
     _writeSeparator();
     _sink.write(value);
     _separator = ",";

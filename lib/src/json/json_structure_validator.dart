@@ -35,7 +35,7 @@ import "../jsontool.dart";
 ///
 /// The current state can be queried using
 /// [allowsValue], [allowsKey], [isArray], [isObject] and [hasValue].
-class JsonStructureValidator {
+final class JsonStructureValidator {
   // Whether a composite structure contains any values yet.
   static const int _hasValue = 1;
   // If set in state, removes _allowValue from the state when a value is provided.

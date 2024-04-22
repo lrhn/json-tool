@@ -20,7 +20,8 @@ import "util.dart";
 /// A validating JSON reader which checks the member invocation sequence.
 ///
 /// The members must only be used in situations where the operation is.
-class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
+final class ValidatingJsonReader<SourceSlice>
+    implements JsonReader<SourceSlice> {
   final JsonStructureValidator _validator = JsonStructureValidator();
   final JsonReader<SourceSlice> _reader;
   // If in an array, whether `hasNext` has been called.
@@ -82,7 +83,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
   }
 
   @override
-  void expectAnyValue(JsonSink sink) {
+  Null expectAnyValue(JsonSink sink) {
     _checkValueAllowed();
     _reader.expectAnyValue(sink);
     _validator.value();
@@ -134,7 +135,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
   }
 
   @override
-  void expectNull() {
+  Null expectNull() {
     _checkValueAllowed();
     _reader.expectNull();
     _validator.value();
@@ -223,7 +224,7 @@ class ValidatingJsonReader<SourceSlice> implements JsonReader<SourceSlice> {
   }
 
   @override
-  void skipAnyValue() {
+  Null skipAnyValue() {
     _validator.value();
     _reader.skipAnyValue();
     _needsHasNext = _validator.isArray;

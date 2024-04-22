@@ -127,7 +127,7 @@ export "string_reader.dart" show StringSlice;
 ///
 /// A reader is not necessarily *validating*.
 /// If the input is not valid JSON, the behavior is unspecified.
-abstract class JsonReader<SourceSlice> {
+abstract interface class JsonReader<SourceSlice> {
   /// Creates a JSON reader from a string containing JSON source.
   ///
   /// Returns a [StringSlice] from [expectAnyValueSource].
@@ -163,7 +163,7 @@ abstract class JsonReader<SourceSlice> {
       JsonObjectReader(source);
 
   /// Consumes the next value which must be `null`.
-  void expectNull();
+  Null expectNull();
 
   /// Consumes the next value if it is `null`.
   ///
@@ -457,7 +457,7 @@ abstract class JsonReader<SourceSlice> {
   /// g.hasNext(); // true;
   /// g.expectString(); // "Here"
   /// ```
-  void skipAnyValue();
+  Null skipAnyValue();
 
   /// Skips the next value.
   ///
@@ -480,7 +480,7 @@ abstract class JsonReader<SourceSlice> {
   ///
   /// Parses the JSON structure of the skipped value
   /// and emits it on the [sink].
-  void expectAnyValue(JsonSink sink);
+  Null expectAnyValue(JsonSink sink);
 
   /// Creates a copy of the state of the current reader.
   ///

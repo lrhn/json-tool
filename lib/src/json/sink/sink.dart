@@ -46,9 +46,9 @@ import "string_writer.dart";
 /// work correctly if calls are performed out of order.
 /// Only call sequences corresponding to a correct JSON structure
 /// are guaranteed to give a meaningful result.
-abstract class JsonSink {
+abstract interface class JsonSink {
   /// Called for a number value.
-  void addNumber(num? value);
+  void addNumber(num value);
 
   /// Called for a null value.
   void addNull();

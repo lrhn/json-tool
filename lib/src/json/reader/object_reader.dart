@@ -25,7 +25,7 @@ import "util.dart";
 /// * a string,
 /// * a list of JSON-like object structures or
 /// * a map from strings to JSON-like object structures.
-class JsonObjectReader implements JsonReader<Object?> {
+final class JsonObjectReader implements JsonReader<Object?> {
   /// The next object to access.
   ///
   /// Is set to `#_none` when there are no next object available.
@@ -110,7 +110,7 @@ class JsonObjectReader implements JsonReader<Object?> {
   int expectInt() => tryInt() ?? (throw _error("Not an integer"));
 
   @override
-  void expectNull() => tryNull() || (throw _error("Not null"));
+  Null expectNull() => tryNull() ? null : (throw _error("Not null"));
 
   @override
   num expectNum() => tryNum() ?? (throw _error("Not a number"));
@@ -313,7 +313,7 @@ class JsonObjectReader implements JsonReader<Object?> {
   }
 
   @override
-  void skipAnyValue() {
+  Null skipAnyValue() {
     if (_next == #_none) {
       throw StateError("No value");
     }
@@ -367,7 +367,7 @@ class JsonObjectReader implements JsonReader<Object?> {
   JsonObjectReader copy() => JsonObjectReader._(_next, _stack?.copy());
 
   @override
-  void expectAnyValue(JsonSink sink) {
+  Null expectAnyValue(JsonSink sink) {
     void emitValue() {
       if (tryObject()) {
         sink.startObject();

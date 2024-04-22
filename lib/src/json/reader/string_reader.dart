@@ -17,7 +17,7 @@ import "reader.dart";
 import "util.dart";
 
 /// A non-validating string-based [JsonReader].
-class JsonStringReader implements JsonReader<StringSlice> {
+final class JsonStringReader implements JsonReader<StringSlice> {
   /// The source string being read.
   final String _source;
 
@@ -100,7 +100,6 @@ class JsonStringReader implements JsonReader<StringSlice> {
   String? tryKey(List<String> candidates) {
     assert(areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
-    if (candidates.isEmpty) return null;
     var nextKey = _nextKeyStart();
     if (nextKey == $rbrace) return null;
     if (nextKey != $quot) throw _error("Not a string");
@@ -138,7 +137,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
   /// Checks for a string literal containing an element of candidates.
   ///
   /// Must be positioned at a `"` character.
-  /// The candidates must be sorted ASCII strings.
+  /// The candidates must be sorted ASCII strings, and must not be empty.
   String? _tryCandidateString(List<String> candidates) {
     var min = 0;
     var max = candidates.length;
@@ -263,6 +262,8 @@ class JsonStringReader implements JsonReader<StringSlice> {
 
   @override
   String expectString([List<String>? candidates]) {
+    assert(candidates == null || candidates.isNotEmpty,
+        throw ArgumentError.value(candidates, "candidates", "Are empty"));
     assert(candidates == null || areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     var char = _nextNonWhitespaceChar();
@@ -318,7 +319,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
             } else {
               char |= 0x20;
               if (char >= $a && char <= $f) {
-                value = value * 16 + (char - ($a - 10));
+                value = value * 16 + char - ($a - 10);
               } else {
                 throw _error("Invalid escape", _index - 1);
               }
@@ -384,7 +385,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
   }
 
   @override
-  void expectNull() {
+  Null expectNull() {
     tryNull() || (throw _error("Not null"));
   }
 
@@ -509,12 +510,8 @@ class JsonStringReader implements JsonReader<StringSlice> {
   int _nextNonWhitespaceChar() {
     while (_index < _source.length) {
       var char = _source.codeUnitAt(_index);
-      // Perfect hash for 0x09 (tab), 0x0a (nl), 0x0d (cr) and 0x20 (space).
-      var base = char -
-          0x9; // 0x00, 0x01, 0x04 or 0x17. Keep this because it only needs 5 bits.
-      var hash = (base | (base >> 1)) & 3; // 0x00, 0x01, 0x02 or 0x03
-      const table = (0x00 << 0) | (0x01 << 5) | (0x04 << 10) | (0x17 << 15);
-      if ((table >> (5 * hash)) & 0x1f == base) {
+      if (char <= 0x20) {
+        assert(isWhitespace(char), throw _error("Not valid character"));
         _index++;
         continue;
       }
@@ -531,12 +528,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
     var index = _index;
     while (index > 0) {
       var char = _source.codeUnitAt(--index);
-      // Perfect hash for 0x09 (tab), 0x0a (nl), 0x0d (cr) and 0x20 (space).
-      var base = char -
-          0x9; // 0x00, 0x01, 0x04 or 0x17. Keep this because it only needs 5 bits.
-      var hash = (base | (base >> 1)) & 3; // 0x00, 0x01, 0x02 or 0x03
-      const table = (0x00 << 0) | (0x01 << 5) | (0x04 << 10) | (0x17 << 15);
-      if ((table >> (5 * hash)) & 0x1f == base) {
+      if (isWhitespace(char)) {
         continue;
       }
       return char;
@@ -547,7 +539,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
   @override
   bool checkNum() {
     var char = _nextNonWhitespaceChar();
-    return char == $minus || (char ^ $0) <= 9;
+    return char ^ $0 <= 9 || char == $minus;
   }
 
   @override
@@ -569,7 +561,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
   bool checkNull() => _nextNonWhitespaceChar() == $n;
 
   @override
-  void skipAnyValue() {
+  Null skipAnyValue() {
     _skipValue();
   }
 
@@ -582,7 +574,7 @@ class JsonStringReader implements JsonReader<StringSlice> {
       _skipUntil($rbracket);
     } else if (char == $quot) {
       _skipString();
-    } else if (char == $minus || char ^ $0 <= 9) {
+    } else if (char ^ $0 <= 9 || char == $minus) {
       _skipNumber();
     } else if (char == $f || char == $t || char == $n) {
       _skipWord();
@@ -632,6 +624,8 @@ class JsonStringReader implements JsonReader<StringSlice> {
 
   @override
   String? tryString([List<String>? candidates]) {
+    assert(candidates == null || candidates.isNotEmpty,
+        throw ArgumentError.value(candidates, "candidates", "Are empty"));
     assert(candidates == null || areSorted(candidates),
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     if (_nextNonWhitespaceChar() == $quot) {
@@ -647,51 +641,51 @@ class JsonStringReader implements JsonReader<StringSlice> {
   JsonStringReader copy() => JsonStringReader._(_source, _index);
 
   @override
-  void expectAnyValue(JsonSink sink) {
+  Null expectAnyValue(JsonSink sink) {
     var char = _nextNonWhitespaceChar();
-    switch (char) {
-      case $lbracket:
-        _index++;
-        sink.startArray();
-        while (hasNext()) {
-          expectAnyValue(sink);
-        }
-        sink.endArray();
-        return;
-      case $lbrace:
-        _index++;
-        sink.startObject();
-        var key = nextKey();
-        while (key != null) {
-          sink.addKey(key);
-          expectAnyValue(sink);
-          key = nextKey();
-        }
-        sink.endObject();
-        return;
-      case $quot:
-        sink.addString(_scanString());
-        return;
-      case $t:
-        assert(_source.startsWith("rue", _index + 1));
-        _index += 4;
-        sink.addBool(true);
-        return;
-      case $f:
-        assert(_source.startsWith("alse", _index + 1));
-        _index += 5;
-        sink.addBool(false);
-        return;
-      case $n:
-        assert(_source.startsWith("ull", _index + 1));
-        _index += 4;
-        sink.addNull();
-        return;
-      default:
-        if (char == $minus || (char ^ 0x30) <= 9) {
-          sink.addNumber(_scanNumber(false, true));
+    if (char <= 0x7f) {
+      switch (jsonCharacters.codeUnitAt(char)) {
+        case 0: // $lbracket:
+          _index++;
+          sink.startArray();
+          while (hasNext()) {
+            expectAnyValue(sink);
+          }
+          sink.endArray();
           return;
-        }
+        case 1: // $lbrace:
+          _index++;
+          sink.startObject();
+          var key = nextKey();
+          while (key != null) {
+            sink.addKey(key);
+            expectAnyValue(sink);
+            key = nextKey();
+          }
+          sink.endObject();
+          return;
+        case 2: // $quot:
+          sink.addString(_scanString());
+          return;
+        case 3: // $t:
+          assert(_source.startsWith("rue", _index + 1));
+          _index += 4;
+          sink.addBool(true);
+          return;
+        case 4: // $f:
+          assert(_source.startsWith("alse", _index + 1));
+          _index += 5;
+          sink.addBool(false);
+          return;
+        case 5: // $n:
+          assert(_source.startsWith("ull", _index + 1));
+          _index += 4;
+          sink.addNull();
+          return;
+        case 6: // $0-9, $minus:
+          sink.addNumber(_scanNumber(false, true)!);
+          return;
+      }
     }
     throw _error("Not a JSON value");
   }
@@ -715,6 +709,12 @@ class StringSlice {
   ///
   /// This is the _index of the first character after the end of the slice.
   final int end;
+
+  /// Creates a slice of [source] from [start] to [end].
+  const StringSlice(this.source, this.start, this.end)
+      : assert(0 <= start),
+        assert(start <= end),
+        assert(end <= source.length);
 
   /// length of the string slice.
   int get length => end - start;
@@ -750,12 +750,6 @@ class StringSlice {
 
   /// Whether the slice string contains [pattern].
   bool contains(String pattern) => _indexOf(pattern, 0, end - start) >= 0;
-
-  /// Creates a slice of [source] from [start] to [end].
-  const StringSlice(this.source, this.start, this.end)
-      : assert(0 <= start),
-        assert(start <= end),
-        assert(end <= source.length);
 
   /// The slice string characters as a separate string.
   @override

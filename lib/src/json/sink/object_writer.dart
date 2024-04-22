@@ -19,7 +19,7 @@ import "sink.dart";
 /// I only the plain [JsonSink] methods are used, in correct order,
 /// then the structure will represent valid JSON and can be traversed
 /// by the reader of [JsonReader.fromObject].
-class JsonObjectWriter implements JsonWriter<Object?> {
+final class JsonObjectWriter implements JsonWriter<Object?> {
   /// The callback which is called for each complete JSON object.
   final void Function(Object?) _result;
 
@@ -88,7 +88,7 @@ class JsonObjectWriter implements JsonWriter<Object?> {
   }
 
   @override
-  void addNumber(num? value) {
+  void addNumber(num value) {
     _value(value);
   }
 
