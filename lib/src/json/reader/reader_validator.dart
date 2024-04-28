@@ -27,7 +27,7 @@ final class ValidatingJsonReader<SourceSlice>
   // If in an array, whether `hasNext` has been called.
   bool _needsHasNext = false;
 
-  ValidatingJsonReader(this._reader);
+  ValidatingJsonReader(JsonReader<SourceSlice> reader) : _reader = reader;
 
   void _checkValueAllowed() {
     if (_needsHasNext || !_validator.allowsValue) {
@@ -40,6 +40,9 @@ final class ValidatingJsonReader<SourceSlice>
       throw StateError("Key not allowed");
     }
   }
+
+  @override
+  FormatException fail(String message) => _reader.fail(message);
 
   @override
   bool checkArray() {
@@ -162,6 +165,15 @@ final class ValidatingJsonReader<SourceSlice>
   String expectString([List<String>? candidates]) {
     _checkValueAllowed();
     var result = _reader.expectString(candidates);
+    _validator.value();
+    _needsHasNext = _validator.isArray;
+    return result;
+  }
+
+  @override
+  int expectStringIndex(List<String> candidates) {
+    _checkValueAllowed();
+    var result = _reader.expectStringIndex(candidates);
     _validator.value();
     _needsHasNext = _validator.isArray;
     return result;
@@ -334,6 +346,20 @@ final class ValidatingJsonReader<SourceSlice>
   }
 
   @override
+  int? tryKeyIndex(List<String> candidates) {
+    if (!areSorted(candidates)) {
+      throw ArgumentError("Candidates are not sorted");
+    }
+    _checkKeyAllowed();
+    var result = _reader.tryKeyIndex(candidates);
+    if (result != null) {
+      _validator.key();
+      _needsHasNext = _validator.isArray;
+    }
+    return result;
+  }
+
+  @override
   bool tryNull() {
     _checkValueAllowed();
     if (_reader.tryNull()) {
@@ -369,6 +395,17 @@ final class ValidatingJsonReader<SourceSlice>
   String? tryString([List<String>? candidates]) {
     _checkValueAllowed();
     var result = _reader.tryString(candidates);
+    if (result != null) {
+      _validator.value();
+      _needsHasNext = _validator.isArray;
+    }
+    return result;
+  }
+
+  @override
+  int? tryStringIndex(List<String> candidates) {
+    _checkValueAllowed();
+    var result = _reader.tryStringIndex(candidates);
     if (result != null) {
       _validator.value();
       _needsHasNext = _validator.isArray;

@@ -162,6 +162,13 @@ abstract interface class JsonReader<SourceSlice> {
   static JsonReader<Object?> fromObject(Object? source) =>
       JsonObjectReader(source);
 
+  /// Creates a [FormatException] at the current point in the input.
+  ///
+  /// Includes the source and position in source (if available) and
+  /// the provided [message], to create a `FormatException` at the
+  /// current position.
+  FormatException fail(String message);
+
   /// Consumes the next value which must be `null`.
   Null expectNull();
 
@@ -239,12 +246,22 @@ abstract interface class JsonReader<SourceSlice> {
   /// The next value, which must be a string.
   ///
   /// If [candidates] is supplied, the next string must be one of the
-  /// candidate strings.
+  /// candidate strings, and must not contain any escape sequences.
   /// The [candidates] must be a *sorted* list of ASCII strings.
   ///
   /// Equivalent to [tryString] except that it throws where
   /// [tryString] would return `null`.
   String expectString([List<String>? candidates]);
+
+  /// The index of the next value, which must be a string, in [candidates].
+  ///
+  /// The next value must be a string, it must be one of the strings in
+  /// [candidates], and it must not contain any escape sequences
+  /// The [candidates] must be a *sorted* list of ASCII strings.
+  ///
+  /// Equivalent to [tryStringIndex] except that it throws where
+  /// [tryString] would return `null`.
+  int expectStringIndex(List<String> candidates);
 
   /// The next value, if it is a string.
   ///
@@ -281,6 +298,39 @@ abstract interface class JsonReader<SourceSlice> {
   /// if you are sure that it will have one of a small number of known
   /// values.
   String? tryString([List<String>? candidates]);
+
+  /// The index of the next value in [candidates], if it is there.
+  ///
+  /// If the next value is a string, it is one of the strings in [candidates]
+  /// *and* the string representation does not contain any escape sequences,
+  /// then the index of the value in [candidiates] is returned.
+  ///
+  /// Otherwise returns `null`, and no value is consumed.
+  ///
+  /// The [candidates] *must* be a non-empty *sorted* list of ASCII
+  /// strings.
+  ///
+  /// Example:
+  /// ```dart
+  /// // Parsing the JSON text: {"type": "bool", "value": true}
+  /// ...
+  /// reader.expectObject();
+  /// var key = reader.nextKey();
+  /// if (key == "type") {
+  ///   var type = reader.tryStringIndex(["bool", "int", "string"]);
+  ///   switch (type) {
+  ///     case 0: // type was "bool" ...
+  ///        key = reader.nextKey();
+  ///        assert(key == "value");
+  ///        bool value = reader.expectBool();
+  ///        // ...
+  ///     case 1: // type was "int" ...
+  ///     case 2: // type was "string" ...
+  ///   } ...
+  /// }
+  /// reader.endObjet();
+  /// ```
+  int? tryStringIndex(List<String> candidates);
 
   /// Whether the next value is a string.
   bool checkString();
@@ -418,6 +468,18 @@ abstract interface class JsonReader<SourceSlice> {
   /// If a match is found, the string object in the [candidates] list
   /// is returned rather than creating a new string.
   String? tryKey(List<String> candidates);
+
+  /// The index of the next object key in candidates, if it is there.
+  ///
+  /// Like [tryKey] except that it returns the index of the match in
+  /// [candidates] instead of the string.
+  ///
+  /// The [candidates] *must* be a non-empty *sorted* list of ASCII
+  /// strings.
+  ///
+  /// This is intended for simple key strings, which is what
+  /// most JSON uses.
+  int? tryKeyIndex(List<String> candidates);
 
   /// Skips the next map entry, if there is one.
   ///

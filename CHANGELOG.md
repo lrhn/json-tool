@@ -1,13 +1,23 @@
+## 2.1.0
+
+- Adds `expectStringIndex`, `tryStringIndex`,  and `tryKeyIndex`
+  to `JsonReader. Allows matching a string in a list, like
+  the non-`Index` operations, but returns in the position in
+  the list instead of the string at that position.
+- Adds `JsonReader.fail` which returns a `FormatException`
+  at the current position in the reader, with a user provided
+  error message.
+
 ## 2.0.0
 
 - Require SDK 3.3.0+.
-- Add class modifiers.
+- Adds class modifiers.
 - Update lints.
 
 - Change some `void` return types to `Null` in `JsonReader`
   This allows uses like `reader.tryString() ?? reader.expectNull()`
   to match a string or `null`.
-- Add `processObjectEntry` method to `JsonProcessor`, called
+- Adds `processObjectEntry` method to `JsonProcessor`, called
   for each object entry.
 - Use table to improve parsing speed for `skipAnyValue`.
 - Faster whitespace skipping in readers.

@@ -185,3 +185,60 @@ JsonSink validateJsonSink(JsonSink sink, {bool allowReuse = false}) {
 /// Can be used if a sink is needed, but the result of the sink
 /// operations is not important.
 const JsonSink nullJsonSink = NullJsonSink();
+
+/// Interface which classes that write themselves to [JsonSink]s can implement.
+abstract interface class JsonWritable {
+  /// Writes a JSON representation of this object to [target].
+  void writeJson(JsonSink target);
+}
+
+extension JsonWritableAddWritable on JsonSink {
+  /// Writes [writable] to this sink.
+  ///
+  /// Convenience function to allow doing `writable.writeJson(sink)`
+  /// inside a sequence cascade calls on the sink.
+  void addWritable(JsonWritable writable) {
+    writable.writeJson(this);
+  }
+}
+
+/// Convenience functions for adding object properties to a [JsonSink].
+///
+/// For hand-written code that adds values to a [JsonSink].
+extension JsonSinkAddEntry on JsonSink {
+  /// Adds a key and string value entry to the current JSON object.
+  ///
+  /// Same as calling [JsonSink.addKey] followed by [JsonSink.addString].
+  void addStringEntry(String key, String value) {
+    this
+      ..addKey(key)
+      ..addString(value);
+  }
+
+  /// Adds a key and boolean value entry to the current JSON object.
+  ///
+  /// Same as calling [JsonSink.addKey] followed by [JsonSink.addBool].
+  void addBoolEntry(String key, bool value) {
+    this
+      ..addKey(key)
+      ..addBool(value);
+  }
+
+  /// Adds a key and number value entry to the current JSON object.
+  ///
+  /// Same as calling [JsonSink.addKey] followed by [JsonSink.addNumber].
+  void addNumberEntry(String key, num value) {
+    this
+      ..addKey(key)
+      ..addNumber(value);
+  }
+
+  /// Adds a key and writable value entry to the current JSON object.
+  ///
+  /// Same as calling [JsonSink.addKey] followed by
+  /// [JsonWritableAddWritable.addWritable].
+  void addWritableEntry(String key, JsonWritable value) {
+    this.addKey(key);
+    value.writeJson(this);
+  }
+}

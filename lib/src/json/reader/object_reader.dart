@@ -53,6 +53,10 @@ final class JsonObjectReader implements JsonReader<Object?> {
   JsonObjectReader._(this._next, this._stack);
 
   @override
+  FormatException fail(String message) =>
+      FormatException(message, _next == #_next ? null : _next);
+
+  @override
   bool checkArray() {
     return _next is List;
   }
@@ -121,6 +125,10 @@ final class JsonObjectReader implements JsonReader<Object?> {
   @override
   String expectString([List<String>? candidates]) =>
       tryString(candidates) ?? (throw _error("Not a string"));
+
+  @override
+  int expectStringIndex(List<String> candidates) =>
+      tryStringIndex(candidates) ?? (throw _error("Not a string"));
 
   @override
   bool hasNext() {
@@ -254,6 +262,29 @@ final class JsonObjectReader implements JsonReader<Object?> {
   }
 
   @override
+  int? tryKeyIndex(List<String> candidates) {
+    assert(areSorted(candidates),
+        throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
+    if (_next == #_none) {
+      var stack = _stack;
+      _MapStack? map;
+      if (stack != null && (map = stack.asMap) != null) {
+        var key = map!.peekKey();
+        if (key != null) {
+          var index = candidates.indexOf(key);
+          if (index >= 0) {
+            map.moveNext();
+            _next = map.valueOf(key);
+            return index;
+          }
+        }
+        return null;
+      }
+    }
+    throw StateError("Not before a JSON object key");
+  }
+
+  @override
   bool tryNull() {
     var current = _next;
     if (current == null) {
@@ -305,6 +336,21 @@ final class JsonObjectReader implements JsonReader<Object?> {
       }
       _next = #_none;
       return current;
+    }
+    if (current == #_none) {
+      throw StateError("No value");
+    }
+    return null;
+  }
+
+  @override
+  int? tryStringIndex(List<String> candidates) {
+    var current = _next;
+    if (current is String) {
+      var index = candidates.indexOf(current);
+      if (index < 0) return null;
+      _next = #_none;
+      return index;
     }
     if (current == #_none) {
       throw StateError("No value");
@@ -429,9 +475,7 @@ abstract class _Stack {
 class _ListStack extends _Stack {
   final List<dynamic> elements;
   int index = 0;
-  _ListStack(List<dynamic> list, _Stack? parent)
-      : elements = list,
-        super(parent);
+  _ListStack(List<dynamic> list, super.parent) : elements = list;
 
   @override
   bool get isList => true;

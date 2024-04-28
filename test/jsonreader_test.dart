@@ -415,7 +415,7 @@ void testReader(JsonReader Function(String source) read) {
 
 JsonReader mkStringReader(String source) => JsonReader.fromString(source);
 JsonReader mkByteReader(String source) =>
-    JsonReader.fromUtf8(utf8.encode(source) as Uint8List);
+    JsonReader.fromUtf8(utf8.encode(source));
 JsonReader mkObjectReader(String source) =>
     JsonReader.fromObject(jsonDecode(source));
 

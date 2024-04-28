@@ -26,3 +26,7 @@ linter:
     - omit_local_variable_types
     - prefer_relative_imports
     - use_if_null_to_convert_nulls_to_bools
+
+analyzer:
+  errors:
+    unnecessary_this: ignore 

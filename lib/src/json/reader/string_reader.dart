@@ -34,6 +34,9 @@ final class JsonStringReader implements JsonReader<StringSlice> {
       FormatException(message, _source, index ?? _index);
 
   @override
+  FormatException fail(String message) => _error(message);
+
+  @override
   void expectObject() {
     if (!tryObject()) throw _error("Not an object");
   }
@@ -106,8 +109,24 @@ final class JsonStringReader implements JsonReader<StringSlice> {
     var result = _tryCandidateString(candidates);
     if (result != null) {
       _expectColon();
+      return candidates[result];
     }
-    return result;
+    return null;
+  }
+
+  @override
+  int? tryKeyIndex(List<String> candidates) {
+    assert(areSorted(candidates),
+        throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
+    var nextKey = _nextKeyStart();
+    if (nextKey == $rbrace) return null;
+    if (nextKey != $quot) throw _error("Not a string");
+    var result = _tryCandidateString(candidates);
+    if (result != null) {
+      _expectColon();
+      return result;
+    }
+    return null;
   }
 
   /// Finds the start of the next key.
@@ -138,7 +157,10 @@ final class JsonStringReader implements JsonReader<StringSlice> {
   ///
   /// Must be positioned at a `"` character.
   /// The candidates must be sorted ASCII strings, and must not be empty.
-  String? _tryCandidateString(List<String> candidates) {
+  ///
+  /// Returns the index of a mathcing string in [candidiates],
+  /// or `null` if not match.
+  int? _tryCandidateString(List<String> candidates) {
     var min = 0;
     var max = candidates.length;
     var start = _index + 1;
@@ -163,7 +185,7 @@ final class JsonStringReader implements JsonReader<StringSlice> {
     var candidate = candidates[min];
     if (candidate.length == i) {
       _index = start + i + 1;
-      return candidate;
+      return min;
     }
     return null;
   }
@@ -275,9 +297,26 @@ final class JsonStringReader implements JsonReader<StringSlice> {
       if (result == null) {
         throw _error("Not an expected string");
       }
-      return result;
+      return candidates[result];
     }
     return _scanString();
+  }
+
+  @override
+  int expectStringIndex(List<String> candidates) {
+    assert(candidates.isNotEmpty,
+        throw ArgumentError.value(candidates, "candidates", "Are empty"));
+    assert(areSorted(candidates),
+        throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
+    var char = _nextNonWhitespaceChar();
+    if (char != $quot) {
+      throw _error("Not a string");
+    }
+    var result = _tryCandidateString(candidates);
+    if (result == null) {
+      throw _error("Not an expected string");
+    }
+    return result;
   }
 
   String _scanString() {
@@ -630,9 +669,23 @@ final class JsonStringReader implements JsonReader<StringSlice> {
         throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
     if (_nextNonWhitespaceChar() == $quot) {
       if (candidates != null) {
-        return _tryCandidateString(candidates);
+        var index = _tryCandidateString(candidates);
+        if (index != null) return candidates[index];
+        return null;
       }
       return _scanString();
+    }
+    return null;
+  }
+
+  @override
+  int? tryStringIndex(List<String> candidates) {
+    assert(candidates.isNotEmpty,
+        throw ArgumentError.value(candidates, "candidates", "Are empty"));
+    assert(areSorted(candidates),
+        throw ArgumentError.value(candidates, "candidates", "Are not sorted"));
+    if (_nextNonWhitespaceChar() == $quot) {
+      return _tryCandidateString(candidates);
     }
     return null;
   }

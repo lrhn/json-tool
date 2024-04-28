@@ -36,7 +36,9 @@ void _benchByteReader(int limit) {
   var sink = NullJsonSink();
   var reader = JsonReader.fromUtf8(inputUtf8);
 
-  var c = 0, e = 0, n = 100;
+  var c = 0;
+  var e = 0;
+  var n = 100;
   var sw = Stopwatch()..start();
   do {
     for (var i = 0; i < n; i++) {
@@ -64,7 +66,9 @@ void _benchStringReader(int limit) {
   var sink = NullJsonSink();
   var reader = JsonReader.fromString(input);
 
-  var c = 0, e = 0, n = 100;
+  var c = 0;
+  var e = 0;
+  var n = 100;
   var sw = Stopwatch()..start();
   do {
     for (var i = 0; i < n; i++) {
